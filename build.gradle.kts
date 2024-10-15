@@ -24,7 +24,7 @@ intellijPlatform {
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         changeNotes = "notes"
         ideaVersion {
-            sinceBuild.set("242.*")
+            sinceBuild.set("242")
             untilBuild.set("242.*")
         }
     }
@@ -56,7 +56,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("242.*")
+        sinceBuild.set("242")
         untilBuild.set("242.*")
         pluginVersion.set("0.1.0")
     }
