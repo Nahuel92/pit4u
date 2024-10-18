@@ -12,13 +12,14 @@
     Version 0.1.1
     <br/>
     <ul>
-    <li>Fixed missing plugin action error (it will be released in an upcoming version).</li>
+    <li>Fixed missing plugin action error (it will be released in an upcoming version)</li>
+    <li>Fixed out-of-bounds error on Windows</li>
     </ul>
 
     Version 0.1.0
     <br/>
     <ul>
-    <li>First iteration that adds a new configuration to run PIT mutation tests.</li>
+    <li>First iteration that adds a new configuration to run PIT mutation tests</li>
     </ul>
     ]]></change-notes>
 
