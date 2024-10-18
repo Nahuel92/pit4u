@@ -6,9 +6,15 @@
     Plugin for IntelliJ that enables you to run PIT mutation tests (pitest.org) directly from your IDE
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog.
   ]]></description>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 
     <change-notes><![CDATA[
+    Version 0.1.1
+    <br/>
+    <ul>
+    <li>Fixed missing plugin action error (it will be released in an upcoming version).</li>
+    </ul>
+
     Version 0.1.0
     <br/>
     <ul>
@@ -23,10 +29,4 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.Pit4UConfigurationType"/>
     </extensions>
-    <actions>
-        <action id="io.github.nahuel92.pit4u.action.Pit4UAction" class="io.github.nahuel92.pit4u.action.Pit4UAction"
-                text="Pit4UPopUpMenuAction" description="Mutate all classes in this package">
-            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
-        </action>
-    </actions>
 </idea-plugin>

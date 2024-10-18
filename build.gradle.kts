@@ -20,9 +20,8 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.1.0"
+        version = "0.1.1"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
-        changeNotes = "notes"
         ideaVersion {
             sinceBuild.set("242")
             untilBuild.set("242.*")
@@ -58,7 +57,7 @@ tasks {
     patchPluginXml {
         sinceBuild.set("242")
         untilBuild.set("242.*")
-        pluginVersion.set("0.1.0")
+        pluginVersion.set("0.1.1")
     }
 
     signPlugin {
@@ -72,6 +71,6 @@ tasks {
     }
 
     generateManifest {
-        version.set("0.1.0")
+        version.set("0.1.1")
     }
 }
