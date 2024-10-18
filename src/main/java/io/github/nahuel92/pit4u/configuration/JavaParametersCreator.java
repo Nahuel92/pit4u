@@ -16,6 +16,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 class JavaParametersCreator {
+    private static final Path PIT4U_LIB_PATH = Path.of(PathManager.getPluginsPath())
+            .resolve("pit4u")
+            .resolve("lib");
+    private static final Path JPL_PATH = PIT4U_LIB_PATH.resolve("junit-platform-launcher-1.9.2.jar");
     private static final List<String> PIT_LIBS = getPitLibs();
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
@@ -35,9 +39,7 @@ class JavaParametersCreator {
     }
 
     private static List<String> getPitLibs() {
-        final var pluginsPath = PathManager.getPluginsPath();
-        final var pit4UPath = Path.of(pluginsPath).resolve("pit4u").resolve("lib");
-        try (final var path = Files.walk(pit4UPath)) {
+        try (final var path = Files.walk(PIT4U_LIB_PATH)) {
             return path.filter(e -> {
                         final var name = e.getFileName().toString();
                         return name.startsWith("pitest-");
@@ -59,11 +61,12 @@ class JavaParametersCreator {
 
     private static void addPitLibraries(final JavaParameters javaParameters) {
         PIT_LIBS.forEach(e -> javaParameters.getClassPath().addFirst(e));
-        if (!javaParameters.getClassPath().getPathList().contains("unit-platform-launcher")) {
-            javaParameters.getClassPath().addFirst(
-                    PIT_LIBS.getFirst().substring(0, PIT_LIBS.getFirst().indexOf("/lib")) +
-                            "/lib/junit-platform-launcher-1.9.2.jar"
-            );
+        final var jplRequired = javaParameters.getClassPath()
+                .getPathList()
+                .stream()
+                .noneMatch(e -> e.startsWith("junit-platform-launcher"));
+        if (jplRequired) {
+            javaParameters.getClassPath().addFirst(JPL_PATH.toString());
         }
     }
 
