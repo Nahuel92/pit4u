@@ -34,7 +34,6 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     private TextFieldWithBrowseButton reportDir;
     private final ActionListener otherParamsActionListener;
     private TextFieldWithBrowseButton otherParams;
-    private OtherParamsDialog otherParamsDialog;
 
     public Pit4USettingsEditor(final Project project) {
         Disposer.register(project, this);
@@ -75,19 +74,17 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     @Override
     protected void disposeEditor() {
         log.info("Disposing Settings Editor");
+        targetClasses.removeActionListener(this.targetClassesActionListener);
+        targetTests.removeActionListener(this.targetTestsActionListener);
 
-        this.targetClasses.removeActionListener(this.targetClassesActionListener);
-        this.targetTests.removeActionListener(this.targetTestsActionListener);
-
-        for (final var actionListener : this.sourceDir.getListeners(ComponentWithBrowseButton.BrowseFolderActionListener.class)) {
-            this.sourceDir.removeActionListener(actionListener);
+        for (final var actionListener : sourceDir.getListeners(ComponentWithBrowseButton.BrowseFolderActionListener.class)) {
+            sourceDir.removeActionListener(actionListener);
         }
 
-        for (final var actionListener : this.reportDir.getListeners(ComponentWithBrowseButton.BrowseFolderActionListener.class)) {
-            this.reportDir.removeActionListener(actionListener);
+        for (final var actionListener : reportDir.getListeners(ComponentWithBrowseButton.BrowseFolderActionListener.class)) {
+            reportDir.removeActionListener(actionListener);
         }
-        this.otherParams.removeActionListener(this.otherParamsActionListener);
-
+        otherParams.removeActionListener(otherParamsActionListener);
         log.info("Settings Editor disposed");
     }
 
@@ -126,7 +123,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     @Override
     @NotNull
     protected JComponent createEditor() {
-        return this.jPanel;
+        return jPanel;
     }
 
     @Override
@@ -150,14 +147,13 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     private ActionListener getActionListener() {
         return e -> ApplicationManager.getApplication().invokeLater(
                 () -> {
-                    var a = new OtherParamsDialog();
-
-                    if (a.showAndGet()) {
-                        final var otherParams = a.getTableItems()
+                    final var otherParamsDialog = new OtherParamsDialog();
+                    if (otherParamsDialog.showAndGet()) {
+                        final var otherParameters = otherParamsDialog.getTableItems()
                                 .stream()
                                 .map(OtherParamItem::toString)
                                 .collect(Collectors.joining(" "));
-                        this.otherParams.setText(otherParams);
+                        otherParams.setText(otherParameters);
                     }
                 }
         );
