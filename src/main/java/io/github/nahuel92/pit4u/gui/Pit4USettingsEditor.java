@@ -22,15 +22,11 @@ import java.util.stream.Collectors;
 public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     private static final Logger log = Logger.getInstance(Pit4USettingsEditor.class);
     private JPanel jPanel;
-
     private TextFieldWithBrowseButton targetClasses;
     private final ActionListener targetClassesActionListener;
-
     private TextFieldWithBrowseButton targetTests;
     private final ActionListener targetTestsActionListener;
-
     private TextFieldWithBrowseButton sourceDir;
-
     private TextFieldWithBrowseButton reportDir;
     private final ActionListener otherParamsActionListener;
     private TextFieldWithBrowseButton otherParams;
@@ -88,6 +84,20 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
         log.info("Settings Editor disposed");
     }
 
+    @Override
+    @NotNull
+    protected JComponent createEditor() {
+        return jPanel;
+    }
+
+    @Override
+    protected void resetEditorFrom(@NotNull final Pit4URunConfiguration s) {
+    }
+
+    @Override
+    protected void applyEditorTo(@NotNull final Pit4URunConfiguration s) {
+    }
+
     public String getTargetClasses() {
         return this.targetClasses.getText();
     }
@@ -118,20 +128,6 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
 
     public void setReportDir(final String reportDir) {
         this.reportDir.setText(reportDir);
-    }
-
-    @Override
-    @NotNull
-    protected JComponent createEditor() {
-        return jPanel;
-    }
-
-    @Override
-    protected void resetEditorFrom(@NotNull final Pit4URunConfiguration s) {
-    }
-
-    @Override
-    protected void applyEditorTo(@NotNull final Pit4URunConfiguration s) {
     }
 
     private ActionListener getActionListener(final String title, final Project project,
