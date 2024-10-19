@@ -14,8 +14,10 @@
     <ul>
     <li>Fixed missing plugin action error (it will be released in an upcoming version)</li>
     <li>Fixed out-of-bounds error on Windows</li>
+    <li>Plugin unload no longer requires a restart</li>
     </ul>
 
+    <br/>
     Version 0.1.0
     <br/>
     <ul>

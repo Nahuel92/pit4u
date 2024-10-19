@@ -10,11 +10,16 @@ IntelliJ to freeze and report errors when using it.
 
 ## Roadmap
 
-- [x] Create MVP
-- [ ] Publish MVP
-- [ ] Add context-aware action
-- [ ] Fix validations in `Other params` table
-- [ ] Parse results and show them in the IDE directly
+Here you will find the ideas I have for this plugin.
+
+### Features
+
+- Add context-aware action
+- Parse results and show them in the IDE directly
+
+### Small improvements
+
+- Review & fix validations in `Other parameters` table
 
 ## Donations
 

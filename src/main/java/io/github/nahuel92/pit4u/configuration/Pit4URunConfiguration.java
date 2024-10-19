@@ -42,7 +42,7 @@ public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
     protected Pit4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
-        pit4USettingsEditor = new Pit4USettingsEditor(project);
+        this.pit4USettingsEditor = new Pit4USettingsEditor(project);
     }
 
     @Override
@@ -120,7 +120,6 @@ public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         super.readExternal(element);
         Pit4UConfigurationStore.readExternal(pit4USettingsEditor, element);
     }
-
 
     @Override
     public void writeExternal(@NotNull final Element element) throws WriteExternalException {

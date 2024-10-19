@@ -1,12 +1,12 @@
 package io.github.nahuel92.pit4u.gui.table;
 
-public class MyTableItem<V> {
+public class OtherParamItem<V> {
     protected final V defaultParameterValue;
     private final String parameterName;
     protected V parameterValue;
     private boolean hasBeenUpdated;
 
-    public MyTableItem(final String parameterName, final V defaultParameterValue) {
+    public OtherParamItem(final String parameterName, final V defaultParameterValue) {
         this.parameterName = parameterName;
         this.defaultParameterValue = defaultParameterValue;
         this.parameterValue = defaultParameterValue;
