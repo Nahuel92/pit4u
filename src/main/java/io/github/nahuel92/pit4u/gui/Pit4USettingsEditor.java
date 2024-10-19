@@ -34,7 +34,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     }
 
     public String getTargetClasses() {
-        return targetClasses.getText();
+        return this.targetClasses.getText();
     }
 
     public void setTargetClasses(final String targetClasses) {
@@ -42,7 +42,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     }
 
     public String getTargetTests() {
-        return targetTests.getText();
+        return this.targetTests.getText();
     }
 
     public void setTargetTests(final String targetTests) {
@@ -50,7 +50,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     }
 
     public String getSourceDirs() {
-        return sourceDir.getText();
+        return this.sourceDir.getText();
     }
 
     public void setSourceDirs(final String sourceDirs) {
@@ -58,7 +58,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     }
 
     public String getReportDir() {
-        return reportDir.getText();
+        return this.reportDir.getText();
     }
 
     public void setReportDir(final String reportDir) {
@@ -68,7 +68,7 @@ public class Pit4USettingsEditor extends SettingsEditor<Pit4URunConfiguration> {
     @Override
     @NotNull
     protected JComponent createEditor() {
-        return jPanel;
+        return this.jPanel;
     }
 
     @Override
