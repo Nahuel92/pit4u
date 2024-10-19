@@ -6,9 +6,16 @@
     Plugin for IntelliJ that enables you to run PIT mutation tests (pitest.org) directly from your IDE
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog.
   ]]></description>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 
     <change-notes><![CDATA[
+    Version 0.1.2
+    <br/>
+    <ul>
+    <li>Plugin unload no longer requires a restart</li>
+    </ul>
+
+    <br/>
     Version 0.1.1
     <br/>
     <ul>
@@ -16,6 +23,7 @@
     <li>Fixed out-of-bounds error on Windows</li>
     </ul>
 
+    <br/>
     Version 0.1.0
     <br/>
     <ul>
