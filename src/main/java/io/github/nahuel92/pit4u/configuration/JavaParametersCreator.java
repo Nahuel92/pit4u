@@ -8,10 +8,12 @@ import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 class JavaParametersCreator {
@@ -22,18 +24,19 @@ class JavaParametersCreator {
     private static final List<String> PIT_LIBS = getPitLibs();
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
-                                        final Project project,
-                                        final PIT4UEditorStatus PIT4UEditorStatus) {
+                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
         setModule(configurationModule, project);
         final var javaParameters = new JavaParameters();
         addPitLibraries(javaParameters);
         configureModules(project, javaParameters);
         javaParameters.setWorkingDirectory(configurationModule.getProject().getBasePath());
         javaParameters.setMainClass("org.pitest.mutationtest.commandline.MutationCoverageReport");
-        javaParameters.getProgramParametersList().add("--targetClasses", PIT4UEditorStatus.getTargetClasses());
-        javaParameters.getProgramParametersList().add("--targetTests", PIT4UEditorStatus.getTargetTests());
-        javaParameters.getProgramParametersList().add("--sourceDirs", PIT4UEditorStatus.getSourceDir());
-        javaParameters.getProgramParametersList().add("--reportDir", PIT4UEditorStatus.getReportDir());
+        javaParameters.getProgramParametersList().add("--targetClasses", pit4UEditorStatus.getTargetClasses());
+        javaParameters.getProgramParametersList().add("--targetTests", pit4UEditorStatus.getTargetTests());
+        javaParameters.getProgramParametersList().add("--sourceDirs", pit4UEditorStatus.getSourceDir());
+        javaParameters.getProgramParametersList().add("--reportDir", pit4UEditorStatus.getReportDir());
+        Arrays.stream(pit4UEditorStatus.getOtherParams().split(StringUtils.SPACE))
+                .forEach(otherParam -> javaParameters.getProgramParametersList().add(otherParam));
         return javaParameters;
     }
 

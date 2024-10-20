@@ -36,11 +36,10 @@ import java.util.List;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements RunConfiguration {
-    private final PIT4UEditorStatus pit4UEditorStatus;
+    private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
-        this.pit4UEditorStatus = new PIT4UEditorStatus();
     }
 
     @Override

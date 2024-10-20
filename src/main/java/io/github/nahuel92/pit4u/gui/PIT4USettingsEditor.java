@@ -15,6 +15,7 @@ import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
 import io.github.nahuel92.pit4u.gui.table.OtherParamItem;
 import io.github.nahuel92.pit4u.gui.table.OtherParamsDialog;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -55,7 +56,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
         targetTests.addActionListener(getPackageChooserListener(
                 "Select Target Tests Package",
                 targetTests,
-                pit4UEditorStatus::setTargetClasses
+                pit4UEditorStatus::setTargetTests
         ));
         sourceDir.addActionListener(getDirectoryListener(
                 "Select Source Directory",
@@ -133,7 +134,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
                         final var otherParameters = otherParamsDialog.getTableItems()
                                 .stream()
                                 .map(OtherParamItem::toString)
-                                .collect(Collectors.joining(" "));
+                                .collect(Collectors.joining(StringUtils.SPACE));
                         otherParams.setText(otherParameters);
                         pit4UEditorStatus.setOtherParams(otherParams.getText());
                     }
