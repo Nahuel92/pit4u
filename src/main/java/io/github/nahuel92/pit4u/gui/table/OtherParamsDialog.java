@@ -38,9 +38,7 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
     @Nullable
     protected JComponent createCenterPanel() {
         defaultButton.addActionListener(e -> otherParamsTableModel.restoreDefaultValues());
-        final var panel = getCenterPanel();
-        log.info("Other Parameters Dialog Created");
-        return panel;
+        return getCenterPanel();
     }
 
     @Override

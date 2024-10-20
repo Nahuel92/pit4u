@@ -8,6 +8,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComponentWithBrowseButton.BrowseFolderActionListener;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
@@ -20,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -103,11 +106,31 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
                                                      final Consumer<String> editorStatusConsumer) {
         return e -> {
             final var packageChooser = new PackageChooserDialog(title, project);
+            final var component = packageChooser.getPreferredFocusedComponent();
+            if (component != null) {
+                component.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyPressed(final KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                            getAndSetValue(packageChooser, field, editorStatusConsumer);
+                            packageChooser.close(DialogWrapper.OK_EXIT_CODE);
+                        }
+                    }
+                });
+            }
             if (packageChooser.showAndGet()) {
-                field.setText(packageChooser.getSelectedPackage().getQualifiedName() + ".*");
-                editorStatusConsumer.accept(field.getText());
+                getAndSetValue(packageChooser, field, editorStatusConsumer);
             }
         };
+    }
+
+    private void getAndSetValue(final PackageChooserDialog packageChooser, final TextFieldWithBrowseButton field,
+                                final Consumer<String> editorStatusConsumer) {
+        final var selectedPackage = packageChooser.getSelectedPackage();
+        if (selectedPackage != null) {
+            field.setText(selectedPackage.getQualifiedName() + ".*");
+            editorStatusConsumer.accept(field.getText());
+        }
     }
 
     private ActionListener getDirectoryListener(final String title, final TextFieldWithBrowseButton field,
