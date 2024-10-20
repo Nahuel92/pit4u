@@ -32,8 +32,6 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
         final var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setSize(screenSize.width - 400, screenSize.height - 400);
         init();
-
-        log.info("Other ParCms Dialog Created");
     }
 
     @Override

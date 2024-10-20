@@ -19,6 +19,8 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
@@ -35,7 +37,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
-        implements RunConfiguration {
+        implements RunConfiguration, Disposable {
+    private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
     private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
@@ -119,5 +122,10 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     public void writeExternal(@NotNull final Element element) throws WriteExternalException {
         super.writeExternal(element);
         PIT4UConfigurationStore.writeExternal(pit4UEditorStatus, element);
+    }
+
+    @Override
+    public void dispose() {
+        log.info("PIT4URunConfiguration Disposed");
     }
 }
