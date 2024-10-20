@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-class Pit4UConfigurationFactory extends ConfigurationFactory {
-    public Pit4UConfigurationFactory(@NotNull final ConfigurationType type) {
+class PIT4UConfigurationFactory extends ConfigurationFactory {
+    public PIT4UConfigurationFactory(@NotNull final ConfigurationType type) {
         super(type);
     }
 
@@ -27,6 +27,6 @@ class Pit4UConfigurationFactory extends ConfigurationFactory {
     @Override
     @NotNull
     public RunConfiguration createTemplateConfiguration(@NotNull final Project project) {
-        return new Pit4URunConfiguration("PIT4U Configuration", project, this);
+        return new PIT4URunConfiguration("PIT4U Configuration", project, this);
     }
 }

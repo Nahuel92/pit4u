@@ -1,5 +1,6 @@
 package io.github.nahuel92.pit4u.gui.table;
 
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.TableView;
@@ -8,14 +9,14 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
 
-public class OtherParamsDialog extends DialogWrapper {
+public class OtherParamsDialog extends DialogWrapper implements Disposable {
     private static final Logger log = Logger.getInstance(OtherParamsDialog.class);
     private final OtherParamsTableModel otherParamsTableModel;
     private final TableView<OtherParamItem<?>> table;
     private final JButton defaultButton;
-    private final ActionListener defaultButtonActionListener;
 
     public OtherParamsDialog() {
         super(true);
@@ -24,37 +25,46 @@ public class OtherParamsDialog extends DialogWrapper {
         this.table = new TableView<>(this.otherParamsTableModel);
         this.table.getColumnModel()
                 .getColumn(1)
-                .setCellEditor(new MyCellEditor());
-
+                .setCellEditor(new OtherParamCellEditor());
         this.defaultButton = new JButton("Reset Defaults");
-        this.defaultButtonActionListener = e -> this.otherParamsTableModel.restoreDefaultValues();
-        defaultButton.addActionListener(this.defaultButtonActionListener);
 
         setTitle("Pit4U - Other Parameters");
         setSize(700, 600);
         init();
+
+        log.info("Other ParCms Dialog Created");
     }
 
     @Override
     @Nullable
     protected JComponent createCenterPanel() {
-        final var panel = new JPanel(new BorderLayout());
-        panel.add(table, BorderLayout.CENTER);
-        final var buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(defaultButton);
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+        defaultButton.addActionListener(e -> otherParamsTableModel.restoreDefaultValues());
+        final var panel = getCenterPanel();
+        log.info("Other Parameters Dialog Created");
         return panel;
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        log.info("Disposing other parameters dialog");
-        defaultButton.removeActionListener(defaultButtonActionListener);
-        log.info("Other parameters dialog disposed");
+        Arrays.stream(defaultButton.getListeners(ActionListener.class)).forEach(defaultButton::removeActionListener);
+        log.info("Other Parameters Dialog Disposed");
     }
 
     public List<OtherParamItem<?>> getTableItems() {
         return otherParamsTableModel.getUpdatedItems();
+    }
+
+    private JPanel getCenterPanel() {
+        final var panel = new JPanel(new BorderLayout());
+        panel.add(table, BorderLayout.CENTER);
+        panel.add(getButtonPanel(), BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private JPanel getButtonPanel() {
+        final var buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(defaultButton);
+        return buttonPanel;
     }
 }

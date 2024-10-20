@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-class Pit4UConfigurationType implements ConfigurationType {
-    private static final Icon ICON = IconLoader.getIcon("/pit4u.svg", Pit4UConfigurationType.class);
+class PIT4UConfigurationType implements ConfigurationType {
+    private static final Icon ICON = IconLoader.getIcon("/pit4u.svg", PIT4UConfigurationType.class);
     private static final String ID = "Pit4UConfigurationType";
 
     @Override
@@ -40,6 +40,6 @@ class Pit4UConfigurationType implements ConfigurationType {
 
     @Override
     public ConfigurationFactory[] getConfigurationFactories() {
-        return new ConfigurationFactory[]{new Pit4UConfigurationFactory(this)};
+        return new ConfigurationFactory[]{new PIT4UConfigurationFactory(this)};
     }
 }

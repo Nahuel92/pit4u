@@ -8,7 +8,6 @@ import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
-import io.github.nahuel92.pit4u.gui.Pit4USettingsEditor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,17 +23,17 @@ class JavaParametersCreator {
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
                                         final Project project,
-                                        final Pit4USettingsEditor pit4USettingsEditor) {
+                                        final PIT4UEditorStatus PIT4UEditorStatus) {
         setModule(configurationModule, project);
         final var javaParameters = new JavaParameters();
         addPitLibraries(javaParameters);
         configureModules(project, javaParameters);
         javaParameters.setWorkingDirectory(configurationModule.getProject().getBasePath());
         javaParameters.setMainClass("org.pitest.mutationtest.commandline.MutationCoverageReport");
-        javaParameters.getProgramParametersList().add("--targetClasses", pit4USettingsEditor.getTargetClasses());
-        javaParameters.getProgramParametersList().add("--targetTests", pit4USettingsEditor.getTargetTests());
-        javaParameters.getProgramParametersList().add("--sourceDirs", pit4USettingsEditor.getSourceDirs());
-        javaParameters.getProgramParametersList().add("--reportDir", pit4USettingsEditor.getReportDir());
+        javaParameters.getProgramParametersList().add("--targetClasses", PIT4UEditorStatus.getTargetClasses());
+        javaParameters.getProgramParametersList().add("--targetTests", PIT4UEditorStatus.getTargetTests());
+        javaParameters.getProgramParametersList().add("--sourceDirs", PIT4UEditorStatus.getSourceDir());
+        javaParameters.getProgramParametersList().add("--reportDir", PIT4UEditorStatus.getReportDir());
         return javaParameters;
     }
 

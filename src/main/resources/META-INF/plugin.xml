@@ -30,6 +30,6 @@
     <depends>com.intellij.gradle</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="io.github.nahuel92.pit4u.configuration.Pit4UConfigurationType"/>
+        <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
     </extensions>
 </idea-plugin>
