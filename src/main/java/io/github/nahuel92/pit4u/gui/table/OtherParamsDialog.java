@@ -29,7 +29,8 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
         this.defaultButton = new JButton("Reset Defaults");
 
         setTitle("Pit4U - Other Parameters");
-        setSize(700, 600);
+        final var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(screenSize.width - 400, screenSize.height - 400);
         init();
 
         log.info("Other ParCms Dialog Created");

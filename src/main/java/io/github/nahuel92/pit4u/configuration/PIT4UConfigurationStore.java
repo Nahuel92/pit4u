@@ -1,5 +1,6 @@
 package io.github.nahuel92.pit4u.configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 
 class PIT4UConfigurationStore {
@@ -17,11 +18,15 @@ class PIT4UConfigurationStore {
         PIT4UEditorStatus.setOtherParams(element.getAttribute(OTHER_PARAMS).getValue());
     }
 
-    public static void writeExternal(final PIT4UEditorStatus PIT4UEditorStatus, final Element element) {
-        element.setAttribute(TARGET_CLASSES, PIT4UEditorStatus.getTargetClasses());
-        element.setAttribute(TARGET_TESTS, PIT4UEditorStatus.getTargetTests());
-        element.setAttribute(SOURCE_DIRS, PIT4UEditorStatus.getSourceDir());
-        element.setAttribute(REPORT_DIR, PIT4UEditorStatus.getReportDir());
-        element.setAttribute(OTHER_PARAMS, PIT4UEditorStatus.getOtherParams());
+    public static void writeExternal(final PIT4UEditorStatus pit4UEditorStatus, final Element element) {
+        element.setAttribute(TARGET_CLASSES, getOrDefault(pit4UEditorStatus.getTargetClasses()));
+        element.setAttribute(TARGET_TESTS, getOrDefault(pit4UEditorStatus.getTargetTests()));
+        element.setAttribute(SOURCE_DIRS, getOrDefault(pit4UEditorStatus.getSourceDir()));
+        element.setAttribute(REPORT_DIR, getOrDefault(pit4UEditorStatus.getReportDir()));
+        element.setAttribute(OTHER_PARAMS, getOrDefault(pit4UEditorStatus.getOtherParams()));
+    }
+
+    private static String getOrDefault(final String value) {
+        return StringUtils.defaultIfBlank(value, StringUtils.EMPTY);
     }
 }
