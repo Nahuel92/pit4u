@@ -1,5 +1,7 @@
 package io.github.nahuel92.pit4u.gui.table;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class OtherParamItem<V> {
     protected final V defaultParameterValue;
     private final String parameterName;
@@ -36,6 +38,6 @@ public class OtherParamItem<V> {
 
     @Override
     public String toString() {
-        return parameterName + " \"" + parameterValue + "\"";
+        return parameterName + StringUtils.SPACE + parameterValue;
     }
 }

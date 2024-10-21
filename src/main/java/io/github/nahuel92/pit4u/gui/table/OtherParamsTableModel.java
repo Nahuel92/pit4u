@@ -50,7 +50,7 @@ class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
 
     @Override
     public int getRowCount() {
-        return this.getItems().size();
+        return getItems().size();
     }
 
     @Override
@@ -61,10 +61,10 @@ class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-            return this.getItems().get(rowIndex).getParameterName();
+            return getItems().get(rowIndex).getParameterName();
         }
         if (columnIndex == 1) {
-            return this.getItems().get(rowIndex).getParameterValue();
+            return getItems().get(rowIndex).getParameterValue();
         }
         throw new IndexOutOfBoundsException();
     }

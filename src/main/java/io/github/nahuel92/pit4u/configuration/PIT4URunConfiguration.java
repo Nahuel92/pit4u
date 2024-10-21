@@ -4,7 +4,6 @@ import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
-import com.intellij.execution.JavaRunConfigurationExtensionManager;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.JavaCommandLineState;
 import com.intellij.execution.configurations.JavaParameters;
@@ -20,14 +19,15 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
-import com.intellij.openapi.options.SettingsEditorGroup;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
-import io.github.nahuel92.pit4u.gui.Pit4USettingsEditor;
+import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,22 +36,19 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
-public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, Pit4URunConfiguration>
-        implements RunConfiguration {
-    private final Pit4USettingsEditor pit4USettingsEditor;
+public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
+        implements RunConfiguration, Disposable {
+    private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
+    private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
-    protected Pit4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
+    protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
-        this.pit4USettingsEditor = new Pit4USettingsEditor(project);
     }
 
     @Override
     @NotNull
     public SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-        final var group = new SettingsEditorGroup<Pit4URunConfiguration>();
-        group.addEditor("PIT4U", pit4USettingsEditor);
-        JavaRunConfigurationExtensionManager.getInstance().appendEditors(this, group);
-        return group;
+        return new PIT4USettingsEditor(getProject(), pit4UEditorStatus);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
             @Override
             protected JavaParameters createJavaParameters() {
-                return JavaParametersCreator.create(getConfigurationModule(), getProject(), pit4USettingsEditor);
+                return JavaParametersCreator.create(getConfigurationModule(), getProject(), pit4UEditorStatus);
             }
 
             @Override
@@ -79,7 +76,7 @@ public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
                                 final var reportLink = "file:///" +
-                                        Path.of(pit4USettingsEditor.getReportDir()).toAbsolutePath() +
+                                        Path.of(pit4UEditorStatus.getReportDir()).toAbsolutePath() +
                                         "/index.html";
                                 consoleView.printHyperlink(
                                         "Report ready, click to open it in your browser",
@@ -118,12 +115,17 @@ public class Pit4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     @Override
     public void readExternal(@NotNull final Element element) throws InvalidDataException {
         super.readExternal(element);
-        Pit4UConfigurationStore.readExternal(pit4USettingsEditor, element);
+        PIT4UConfigurationStore.readExternal(pit4UEditorStatus, element);
     }
 
     @Override
     public void writeExternal(@NotNull final Element element) throws WriteExternalException {
         super.writeExternal(element);
-        Pit4UConfigurationStore.writeExternal(pit4USettingsEditor, element);
+        PIT4UConfigurationStore.writeExternal(pit4UEditorStatus, element);
+    }
+
+    @Override
+    public void dispose() {
+        log.info("PIT4URunConfiguration Disposed");
     }
 }

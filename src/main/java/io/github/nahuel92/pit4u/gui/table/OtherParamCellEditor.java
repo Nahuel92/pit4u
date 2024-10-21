@@ -6,7 +6,7 @@ import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
 
-class MyCellEditor extends AbstractCellEditor implements TableCellEditor {
+class OtherParamCellEditor extends AbstractCellEditor implements TableCellEditor {
     private static final String[] OUTPUT_FORMATS = {
             "HTML",
             "XML",
@@ -20,7 +20,7 @@ class MyCellEditor extends AbstractCellEditor implements TableCellEditor {
     private final JTextField textField;
     private final JCheckBox checkBox;
 
-    public MyCellEditor() {
+    public OtherParamCellEditor() {
         this.comboBox = new ComboBox<>(OUTPUT_FORMATS);
         this.textField = new JTextField();
         this.checkBox = new JCheckBox();

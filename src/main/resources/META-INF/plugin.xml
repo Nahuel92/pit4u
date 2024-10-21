@@ -12,9 +12,16 @@
     Version 0.1.1
     <br/>
     <ul>
-    <li>Fixed missing plugin action error (it will be released in an upcoming version)</li>
+    <li>Fixed missing plugin action error (which will be released in an upcoming version)</li>
     <li>Fixed out-of-bounds error on Windows</li>
-    <li>Plugin unload no longer requires a restart</li>
+    <li>Advanced parameters are now correctly parsed</li>
+    <li>Package can now be chose pressing Enter/return</li>
+    </ul>
+    Known issues
+    <br/>
+    <ul>
+    <li>When a configuration is deleted, its state may survive and appear in a new configuration</li>
+    <li>Plugin fails to unload without restarting the IDE</li>
     </ul>
 
     <br/>
@@ -30,6 +37,6 @@
     <depends>com.intellij.gradle</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="io.github.nahuel92.pit4u.configuration.Pit4UConfigurationType"/>
+        <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
     </extensions>
 </idea-plugin>
