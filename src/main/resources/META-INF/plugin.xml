@@ -20,7 +20,7 @@
     Known issues
     <br/>
     <ul>
-    <li>When a configuration is deleted, its state can survive and appear in a new configuration</li>
+    <li>When a configuration is deleted, its state may survive and appear in a new configuration</li>
     <li>Plugin fails to unload without restarting the IDE</li>
     </ul>
 
