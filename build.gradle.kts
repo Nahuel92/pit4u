@@ -24,7 +24,6 @@ intellijPlatform {
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set("242")
-            untilBuild.set("242.*")
         }
     }
 }
