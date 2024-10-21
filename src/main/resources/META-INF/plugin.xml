@@ -15,7 +15,7 @@
     <li>Fixed missing plugin action error (which will be released in an upcoming version)</li>
     <li>Fixed out-of-bounds error on Windows</li>
     <li>Advanced parameters are now correctly parsed</li>
-    <li>Package can now be chose pressing Enter/return</li>
+    <li>Packages can now be chosen pressing Enter/return</li>
     </ul>
     Known issues
     <br/>
