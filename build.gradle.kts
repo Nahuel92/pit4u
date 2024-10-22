@@ -20,11 +20,10 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.1.1"
+        version = "0.1.2"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set("242")
-            untilBuild.set("242.*")
         }
     }
 }
