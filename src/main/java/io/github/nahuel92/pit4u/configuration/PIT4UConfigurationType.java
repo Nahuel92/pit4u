@@ -1,45 +1,26 @@
 package io.github.nahuel92.pit4u.configuration;
 
-import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.ConfigurationType;
+import com.intellij.execution.configurations.ConfigurationTypeBase;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.IconLoader;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NonNls;
-import org.jetbrains.annotations.NotNull;
+import com.intellij.openapi.util.NotNullLazyValue;
 
 import javax.swing.*;
 
-class PIT4UConfigurationType implements ConfigurationType {
-    private static final Icon ICON = IconLoader.getIcon("/pit4u.svg", PIT4UConfigurationType.class);
+class PIT4UConfigurationType extends ConfigurationTypeBase {
     private static final String ID = "Pit4UConfigurationType";
+    private static final Icon ICON = IconLoader.findIcon(
+            PIT4UConfigurationType.class.getResource("/icons/pit4u.svg"),
+            false
+    );
 
-    @Override
-    @NotNull
-    @Nls(capitalization = Nls.Capitalization.Title)
-    public String getDisplayName() {
-        return "PIT4U";
-    }
-
-    @Override
-    @Nls(capitalization = Nls.Capitalization.Sentence)
-    public String getConfigurationTypeDescription() {
-        return "PIT runner that assess your tests strength";
-    }
-
-    @Override
-    @NotNull
-    @NonNls
-    public String getId() {
-        return ID;
-    }
-
-    @Override
-    public Icon getIcon() {
-        return ICON;
-    }
-
-    @Override
-    public ConfigurationFactory[] getConfigurationFactories() {
-        return new ConfigurationFactory[]{new PIT4UConfigurationFactory(this)};
+    protected PIT4UConfigurationType() {
+        super(
+                ID,
+                "PIT4U",
+                "PIT runner that assess your tests strength",
+                NotNullLazyValue.createValue(() -> ICON == null ? AllIcons.Empty : ICON)
+        );
+        addFactory(new PIT4UConfigurationFactory(this));
     }
 }
