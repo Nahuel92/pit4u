@@ -40,15 +40,19 @@ class OtherParamCellEditor extends AbstractCellEditor implements TableCellEditor
     @Override
     public Component getTableCellEditorComponent(final JTable table, final Object value,
                                                  boolean isSelected, int row, int column) {
-        if (row < 5) {
-            checkBox.setSelected((Boolean) value);
-            return checkBox;
-        }
-        if (row == 5) {
-            comboBox.setSelectedItem(value);
-            return comboBox;
-        }
-        textField.setText(value.toString());
-        return textField;
+        return switch (value) {
+            case Boolean b -> {
+                checkBox.setSelected(b);
+                yield checkBox;
+            }
+            case String s when row == 5 -> {
+                comboBox.setSelectedItem(s);
+                yield comboBox;
+            }
+            default -> {
+                textField.setText(value.toString());
+                yield textField;
+            }
+        };
     }
 }

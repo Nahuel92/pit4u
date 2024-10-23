@@ -2,42 +2,25 @@ package io.github.nahuel92.pit4u.gui.table;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class OtherParamItem<V> {
-    protected final V defaultParameterValue;
-    private final String parameterName;
-    protected V parameterValue;
-    private boolean hasBeenUpdated;
-
-    public OtherParamItem(final String parameterName, final V defaultParameterValue) {
-        this.parameterName = parameterName;
-        this.defaultParameterValue = defaultParameterValue;
-        this.parameterValue = defaultParameterValue;
+public record OtherParamItem<V>(String name, V defaultValue, V value) {
+    public OtherParamItem(String name, V defaultValue) {
+        this(name, defaultValue, defaultValue);
     }
 
-    public String getParameterName() {
-        return parameterName;
+    public OtherParamItem<V> from(final V newValue) {
+        return new OtherParamItem<>(name, defaultValue, newValue);
     }
 
-    public V getParameterValue() {
-        return parameterValue;
-    }
-
-    @SuppressWarnings("unchecked")
-    public void setParameterValue(final Object newValue) {
-        this.parameterValue = (V) newValue;
-        this.hasBeenUpdated = true;
-    }
-
-    public void resetDefaults() {
-        this.parameterValue = defaultParameterValue;
+    public OtherParamItem<V> resetDefaults() {
+        return new OtherParamItem<>(name, defaultValue);
     }
 
     public boolean hasBeenUpdated() {
-        return hasBeenUpdated && !defaultParameterValue.equals(parameterValue);
+        return !defaultValue.equals(value);
     }
 
     @Override
     public String toString() {
-        return parameterName + StringUtils.SPACE + parameterValue;
+        return name + StringUtils.SPACE + value;
     }
 }
