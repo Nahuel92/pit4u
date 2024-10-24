@@ -107,7 +107,7 @@ public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
     }
 
     public void restoreDefaultValues() {
-        setItems(getAdvancedArgs());
+        super.setItems(getAdvancedArgs());
         fireTableDataChanged();
     }
 
