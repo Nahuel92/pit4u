@@ -10,7 +10,7 @@ You can find it available on [Jetbrains Marketplace](https://plugins.jetbrains.c
 
 I created this plugin because the [reference plugin](https://github.com/mjedynak/pit-idea-plugin) by Michal Jedynak (
 thank you for that amazing plugin) seems to be abandoned, and its latest version is using deprecated APIs that is
-causing IntelliJ to freeze and report errors when using it. I also plan on add new features that, at the time of
+causing IntelliJ to freeze and report errors when using it. I also expect to add new features that, at the time of
 writing, don't exist in the aforementioned plugin.
 
 ## Roadmap
