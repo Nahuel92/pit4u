@@ -10,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.List;
 
 public class OtherParamsDialog extends DialogWrapper implements Disposable {
     private static final Logger log = Logger.getInstance(OtherParamsDialog.class);
@@ -18,10 +17,10 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
     private final TableView<OtherParamItem<?>> table;
     private final JButton defaultButton;
 
-    public OtherParamsDialog() {
+    public OtherParamsDialog(final String otherParams) {
         super(true);
 
-        this.otherParamsTableModel = new OtherParamsTableModel();
+        this.otherParamsTableModel = new OtherParamsTableModel(otherParams);
         this.table = new TableView<>(this.otherParamsTableModel);
         this.table.getColumnModel()
                 .getColumn(1)
@@ -48,8 +47,12 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
         log.info("Other Parameters Dialog Disposed");
     }
 
-    public List<OtherParamItem<?>> getTableItems() {
-        return otherParamsTableModel.getUpdatedItems();
+    public String getUserFriendlyModel() {
+        return otherParamsTableModel.getUserFriendlyModel();
+    }
+
+    public String getModelToSave() {
+        return otherParamsTableModel.getModelToSave();
     }
 
     private JPanel getCenterPanel() {

@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class JavaParametersCreator {
-    private static final Path PIT4U_LIB_PATH = Path.of(PathManager.getPluginsPath())
+    private static final Path PIT4U_LIB_PATH = PathManager.getPluginsDir()
             .resolve("pit4u")
             .resolve("lib");
     private static final Path JPL_PATH = PIT4U_LIB_PATH.resolve("junit-platform-launcher-1.9.2.jar");

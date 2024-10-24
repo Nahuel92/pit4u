@@ -14,9 +14,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
 import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
-import io.github.nahuel92.pit4u.gui.table.OtherParamItem;
 import io.github.nahuel92.pit4u.gui.table.OtherParamsDialog;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -25,7 +23,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     private static final Logger log = Logger.getInstance(PIT4USettingsEditor.class);
@@ -151,15 +148,11 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     private ActionListener getOtherParamsDialogListener() {
         return e -> ApplicationManager.getApplication().invokeLater(
                 () -> {
-                    final var otherParamsDialog = new OtherParamsDialog();
+                    final var otherParamsDialog = new OtherParamsDialog(pit4UEditorStatus.getOtherParams());
                     Disposer.register(this, otherParamsDialog);
                     if (otherParamsDialog.showAndGet()) {
-                        final var otherParameters = otherParamsDialog.getTableItems()
-                                .stream()
-                                .map(OtherParamItem::toString)
-                                .collect(Collectors.joining(StringUtils.SPACE));
-                        otherParams.setText(otherParameters);
-                        pit4UEditorStatus.setOtherParams(otherParams.getText());
+                        otherParams.setText(otherParamsDialog.getUserFriendlyModel());
+                        pit4UEditorStatus.setOtherParams(otherParamsDialog.getModelToSave());
                     }
                 }
         );

@@ -7,12 +7,15 @@ public record OtherParamItem<V>(String name, V defaultValue, V value) {
         this(name, defaultValue, defaultValue);
     }
 
-    public OtherParamItem<V> from(final V newValue) {
-        return new OtherParamItem<>(name, defaultValue, newValue);
-    }
-
-    public OtherParamItem<V> resetDefaults() {
-        return new OtherParamItem<>(name, defaultValue);
+    public OtherParamItem<V> from(final Object newValue) {
+        final var typedNewValue = switch (newValue) {
+            case Boolean b -> b;
+            case String s -> s;
+            case Float f -> f;
+            case Integer i -> i;
+            default -> throw new IllegalStateException("Unexpected value: " + value);
+        };
+        return new OtherParamItem<>(name, defaultValue, (V) typedNewValue);
     }
 
     public boolean hasBeenUpdated() {

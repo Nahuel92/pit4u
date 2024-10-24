@@ -18,7 +18,6 @@
     <br/>
     <ul>
     <li>When a configuration is deleted, its state may survive and appear in a new configuration</li>
-    <li></li>
     </ul>
 
     <br/>
