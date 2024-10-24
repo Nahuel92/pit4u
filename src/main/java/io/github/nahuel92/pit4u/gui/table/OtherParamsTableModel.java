@@ -1,5 +1,6 @@
 package io.github.nahuel92.pit4u.gui.table;
 
+import com.intellij.openapi.util.NlsContexts;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import org.apache.commons.lang3.StringUtils;
@@ -8,11 +9,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
     public OtherParamsTableModel(final String otherParams) {
-        super(new NameColumnInfo(), new ValueColumnInfo());
+        super(
+                new OtherParamsColumnInfo<>("Parameter", OtherParamItem::name),
+                new OtherParamsColumnInfo<>("Value", OtherParamItem::value)
+        );
 
         final var advancedArgs = getAdvancedArgs();
         setSavedValues(otherParams, advancedArgs);
@@ -66,16 +71,6 @@ public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
     }
 
     @Override
-    public int getRowCount() {
-        return getItems().size();
-    }
-
-    @Override
-    public int getColumnCount() {
-        return 2;
-    }
-
-    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
             return getItems().get(rowIndex).name();
@@ -98,17 +93,17 @@ public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
         return columnIndex == 1;
     }
 
+    public void restoreDefaultValues() {
+        super.setItems(getAdvancedArgs());
+        fireTableDataChanged();
+    }
+
     public String getUserFriendlyModel() {
         return getModel(StringUtils.SPACE);
     }
 
     public String getModelToSave() {
         return getModel(System.lineSeparator());
-    }
-
-    public void restoreDefaultValues() {
-        super.setItems(getAdvancedArgs());
-        fireTableDataChanged();
     }
 
     private String getModel(final String delimiter) {
@@ -119,27 +114,18 @@ public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
                 .collect(Collectors.joining(delimiter));
     }
 
-    private static class NameColumnInfo extends ColumnInfo<OtherParamItem<?>, String> {
-        public NameColumnInfo() {
-            super("Parameter");
+    private static class OtherParamsColumnInfo<T> extends ColumnInfo<OtherParamItem<?>, T> {
+        private final Function<OtherParamItem<?>, T> function;
+
+        OtherParamsColumnInfo(@NlsContexts.ColumnName final String name, final Function<OtherParamItem<?>, T> function) {
+            super(name);
+            this.function = function;
         }
 
         @Override
         @Nullable
-        public String valueOf(final OtherParamItem o) {
-            return o.name();
-        }
-    }
-
-    private static class ValueColumnInfo extends ColumnInfo<OtherParamItem<?>, Object> {
-        public ValueColumnInfo() {
-            super("Value");
-        }
-
-        @Override
-        @Nullable
-        public Object valueOf(final OtherParamItem<?> o) {
-            return o.value();
+        public T valueOf(final OtherParamItem<?> otherParamItem) {
+            return function.apply(otherParamItem);
         }
     }
 }
