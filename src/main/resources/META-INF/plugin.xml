@@ -6,43 +6,47 @@
     Plugin for IntelliJ that enables you to run PIT mutation tests (pitest.org) directly from your IDE
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog.
   ]]></description>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 
     <change-notes><![CDATA[
-    Version 0.1.2
-    <br/>
+    <h4>Version 0.1.3</h4>
+    <p><em>New release to address bugs.</em></p>
+    <h5>Changes</h5>
     <ul>
-    <li>Plugin unload no longer requires restarting the IDE</li>
+        <li><em>Other Params</em> state is not persisted and restored as expected</li>
+        <li>When a configuration is deleted, <em>Other Params</em> state is not removed and appears in a new configuration</li>
     </ul>
-    Known issues
-    <br/>
+    <h5>Known issues</h5>
+    <p style="margin-left: 30px;">There are no known issues yet. Hooray!</p>
+
+    <h4>Version 0.1.2</h4>
+    <p><em>New release that enables future updates without needing to restart the IDE.</em></p>
+    <h5>Changes</h5>
     <ul>
-    <li>When a configuration is deleted, its state may survive and appear in a new configuration</li>
-    <li></li>
+        <li>Plugin unload no longer requires restarting the IDE</li>
+    </ul>
+    <h5>Known issues</h5>
+    <ul>
+        <li>When a configuration is deleted, <em>Other Params</em> state is not removed and appears in a new configuration</li>
     </ul>
 
-    <br/>
-    Version 0.1.1
-    <br/>
+    <h4>Version 0.1.1</h4>
+    <p><em>New release to address mostly critical bugs.</em></p>
+    <h5>Changes</h5>
     <ul>
-    <li>Fixed missing plugin action error (which will be released in an upcoming version)</li>
-    <li>Fixed out-of-bounds error on Windows</li>
-    <li>Advanced parameters are now correctly parsed</li>
-    <li>Packages can now be chosen pressing Enter/return</li>
+        <li>Fixed missing plugin action error (which will be released in an upcoming version)</li>
+        <li>Fixed out-of-bounds error on Windows</li>
+        <li>Advanced parameters are now correctly parsed</li>
+        <li>Packages can now be chosen pressing Enter/return</li>
     </ul>
-    Known issues
-    <br/>
+    <h5>Known issues</h5>
     <ul>
-    <li>When a configuration is deleted, its state may survive and appear in a new configuration</li>
-    <li>Plugin fails to unload without restarting the IDE</li>
+        <li>When a configuration is deleted, <em>Other Params</em> state is not removed and appears in a new configuration</li>
+        <li>Plugin fails to unload without restarting the IDE</li>
     </ul>
 
-    <br/>
-    Version 0.1.0
-    <br/>
-    <ul>
-    <li>First iteration that adds a new configuration to run PIT mutation tests</li>
-    </ul>
+    <h4>Version 0.1.0</h4>
+    <p><em>First release that adds a new configuration to run PIT mutation tests.</em></p>
     ]]></change-notes>
 
     <depends>com.intellij.modules.java</depends>

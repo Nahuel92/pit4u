@@ -42,7 +42,7 @@ public class PIT4UEditorStatus {
     }
 
     public String getOtherParams() {
-        return otherParams;
+        return otherParams.replace(System.lineSeparator(), StringUtils.SPACE);
     }
 
     public void setOtherParams(final String otherParams) {

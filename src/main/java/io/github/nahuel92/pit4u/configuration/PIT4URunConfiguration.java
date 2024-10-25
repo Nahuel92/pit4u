@@ -37,7 +37,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
-        implements RunConfiguration, Disposable {
+        implements Disposable {
     private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
     private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
