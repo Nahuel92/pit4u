@@ -1,5 +1,7 @@
 package io.github.nahuel92.pit4u.configuration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
@@ -28,16 +30,20 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
+import io.github.nahuel92.pit4u.highlighter.Highlighter;
+import io.github.nahuel92.pit4u.highlighter.PITLine;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
+    public static final XmlMapper XML_MAPPER = new XmlMapper();
     private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
     private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
@@ -75,13 +81,26 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                         new ProcessAdapter() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                final var reportLink = "file:///" +
-                                        Path.of(pit4UEditorStatus.getReportDir()).toAbsolutePath() +
-                                        "/index.html";
+                                final var reportLink = "file:///" + Path.of(pit4UEditorStatus.getReportDir())
+                                        .resolve("index.html").toAbsolutePath();
                                 consoleView.printHyperlink(
                                         "Report ready, click to open it in your browser",
                                         new OpenUrlHyperlinkInfo(reportLink)
                                 );
+
+                                final var path = Path.of(pit4UEditorStatus.getReportDir())
+                                        .toAbsolutePath().resolve("mutations.xml");
+
+                                List<PITLine> results = null;
+                                try {
+                                    results = XML_MAPPER.readValue(path.toFile(), new TypeReference<>() {
+                                    });
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                final var highlighter = new Highlighter();
+                                highlighter.updateMarkers(getProject(), results);
                             }
                         }
                 );

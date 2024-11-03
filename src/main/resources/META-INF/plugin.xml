@@ -55,5 +55,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="io.github.nahuel92.pit4u.highlighter.Highlighter"/>
     </extensions>
 </idea-plugin>
