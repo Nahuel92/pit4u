@@ -91,11 +91,14 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
                                         .toAbsolutePath().resolve("mutations.xml");
 
-                                List<PITLine> results = null;
+                                List<PITLine> results;
                                 try {
-                                    results = XML_MAPPER.readValue(path.toFile(), new TypeReference<>() {
-                                    });
-                                } catch (IOException e) {
+                                    results = XML_MAPPER.readValue(
+                                            path.toFile(),
+                                            new TypeReference<>() {
+                                            }
+                                    );
+                                } catch (final IOException e) {
                                     throw new RuntimeException(e);
                                 }
 
