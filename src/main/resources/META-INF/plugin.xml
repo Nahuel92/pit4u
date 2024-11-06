@@ -6,18 +6,28 @@
     Plugin for IntelliJ that enables you to run PIT mutation tests (pitest.org) directly from your IDE
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog.
   ]]></description>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
 
     <change-notes><![CDATA[
+    <h4>Version 0.1.4</h4>
+    <p><em>New release to bump up dependencies and address bugs.</em></p>
+    <h5>Changes</h5>
+    <ul>
+        <li><em>Fixed an error that happened when the selected report output is XML/CSV</li>
+        <li>Updated PIT dependencies</li>
+    </ul>
+    <h5>Known issues</h5>
+    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
+
     <h4>Version 0.1.3</h4>
     <p><em>New release to address bugs.</em></p>
     <h5>Changes</h5>
     <ul>
-        <li><em>Other Params</em> state is not persisted and restored as expected</li>
-        <li>When a configuration is deleted, <em>Other Params</em> state is not removed and appears in a new configuration</li>
+        <li><em>Other Params</em> state is now persisted and restored as expected</li>
+        <li>When a configuration is deleted, <em>Other Params</em> state is now effectively removed</li>
     </ul>
     <h5>Known issues</h5>
-    <p style="margin-left: 30px;">There are no known issues yet. Hooray!</p>
+    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
 
     <h4>Version 0.1.2</h4>
     <p><em>New release that enables future updates without needing to restart the IDE.</em></p>

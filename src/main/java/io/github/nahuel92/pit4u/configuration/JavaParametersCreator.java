@@ -44,7 +44,7 @@ class JavaParametersCreator {
         try (final var path = Files.walk(PIT4U_LIB_PATH)) {
             return path.filter(e -> {
                         final var name = e.getFileName().toString();
-                        return name.startsWith("pitest-");
+                        return name.startsWith("pitest-") || name.startsWith("commons-");
                     })
                     .map(Path::toAbsolutePath)
                     .map(Path::toString)
