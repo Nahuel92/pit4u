@@ -20,7 +20,7 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.1.3"
+        version = "0.1.4"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set("242")
@@ -28,12 +28,14 @@ intellijPlatform {
     }
 }
 
+val pitVersion = "1.17.1"
+
 dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.1")
-    implementation("org.pitest:pitest:1.17.0")
+    implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.1")
-    implementation("org.pitest:pitest-command-line:1.17.0")
-    implementation("org.pitest:pitest-entry:1.17.0")
+    implementation("org.pitest:pitest-command-line:$pitVersion")
+    implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
         intellijIdeaCommunity("2024.2.3")
         bundledPlugin("com.intellij.java")
