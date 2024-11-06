@@ -13,7 +13,7 @@
     <p><em>New release to bump up dependencies and address bugs.</em></p>
     <h5>Changes</h5>
     <ul>
-        <li><em>Fixed an error that happened when the selected report output is XML/CSV</li>
+        <li>Fixed an error that happened when the selected report output is XML/CSV</li>
         <li>Updated PIT dependencies</li>
     </ul>
     <h5>Known issues</h5>
