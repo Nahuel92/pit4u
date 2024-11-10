@@ -10,7 +10,7 @@ import javax.swing.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-public class MyTextFieldWithBrowseButton extends TextFieldWithBrowseButton {
+public class OtherParamsButton extends TextFieldWithBrowseButton {
     @Override
     @NotNull
     protected Icon getDefaultIcon() {
