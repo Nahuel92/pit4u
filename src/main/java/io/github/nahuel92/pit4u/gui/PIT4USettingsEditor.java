@@ -33,7 +33,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     private TextFieldWithBrowseButton targetTests;
     private TextFieldWithBrowseButton sourceDir;
     private TextFieldWithBrowseButton reportDir;
-    private TextFieldWithBrowseButton otherParams;
+    private MyTextFieldWithBrowseButton otherParams;
 
     public PIT4USettingsEditor(final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
         this.project = project;
