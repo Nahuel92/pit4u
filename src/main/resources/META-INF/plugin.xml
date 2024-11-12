@@ -73,6 +73,12 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
 
+    <actions>
+        <action id="io.github.nahuel92.pit4u.action.PIT4UAction" class="io.github.nahuel92.pit4u.action.PIT4UAction"
+                text="Pit4UPopUpMenuAction" description="Mutate all classes in this package">
+            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
+        </action>
+    </actions>
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
     </extensions>

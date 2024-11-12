@@ -39,7 +39,7 @@ import java.util.List;
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
     private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
-    private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
+    private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
@@ -127,5 +127,9 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     @Override
     public void dispose() {
         log.info("PIT4URunConfiguration Disposed");
+    }
+
+    public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
+        this.pit4UEditorStatus = pit4UEditorStatus;
     }
 }
