@@ -128,7 +128,6 @@ public class PIT4UAction extends AnAction {
         if (project == null || module == null) {
             return false;
         }
-
         final var psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         if (psiElement instanceof PsiDirectory psiDirectory) {
             final var scope = new DirectoryScope(project, psiDirectory.getVirtualFile(), true);
@@ -138,7 +137,7 @@ public class PIT4UAction extends AnAction {
             );
             final var containsTestFiles = FileTypeIndex.processFiles(
                     JavaFileType.INSTANCE,
-                    a -> a.getName().endsWith("Test.java"),
+                    a -> a.getPath().contains("test"),
                     scope
             );
             return containsJavaFiles && !containsTestFiles;
