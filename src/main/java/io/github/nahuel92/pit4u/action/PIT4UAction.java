@@ -7,17 +7,22 @@ import com.intellij.execution.RunnerAndConfigurationSettings;
 import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.ide.projectView.impl.nodes.ClassTreeNode;
 import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.JavaDirectoryService;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiQualifiedNamedElement;
+import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
 import io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType;
 import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
@@ -117,6 +122,34 @@ public class PIT4UAction extends AnAction {
         ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
     }
 
+    private static boolean shouldShow(final AnActionEvent e) {
+        final var project = e.getProject();
+        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        if (project == null || module == null) {
+            return false;
+        }
+
+        final var psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
+        if (psiElement instanceof PsiDirectory psiDirectory) {
+            final var scope = new DirectoryScope(project, psiDirectory.getVirtualFile(), true);
+            final var containsJavaFiles = FileTypeIndex.containsFileOfType(
+                    JavaFileType.INSTANCE,
+                    scope
+            );
+            final var containsTestFiles = FileTypeIndex.processFiles(
+                    JavaFileType.INSTANCE,
+                    a -> a.getName().endsWith("Test.java"),
+                    scope
+            );
+            return containsJavaFiles && !containsTestFiles;
+        }
+        return psiElement instanceof PsiClass psiClass &&
+                !psiClass.getContainingFile()
+                        .getContainingDirectory()
+                        .getVirtualFile()
+                        .getPath().contains("test");
+    }
+
     @Override
     @NotNull
     public ActionUpdateThread getActionUpdateThread() {
@@ -125,7 +158,11 @@ public class PIT4UAction extends AnAction {
 
     @Override
     public void update(@NotNull final AnActionEvent e) {
-        super.update(e);
+        if (!shouldShow(e)) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+        e.getPresentation().setEnabledAndVisible(true);
         final var navigatables = e.getData(CommonDataKeys.NAVIGATABLE_ARRAY);
         if (navigatables == null || navigatables[0] == null) {
             return;
