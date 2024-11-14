@@ -134,9 +134,11 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
                                                 final Consumer<String> editorStatusConsumer) {
         return e -> {
             new BrowseFolderActionListener<>(
+                    title,
+                    null,
                     field,
                     project,
-                    FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(title),
+                    FileChooserDescriptorFactory.createSingleFolderDescriptor(),
                     TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
             ).actionPerformed(e);
             editorStatusConsumer.accept(field.getText());

@@ -27,6 +27,7 @@ intellijPlatform {
             untilBuild.set("243.*")
         }
     }
+    buildSearchableOptions.set(false)
 }
 
 val pitVersion = "1.17.1"
@@ -37,7 +38,7 @@ dependencies {
     implementation("org.pitest:pitest-command-line:$pitVersion")
     implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
-        intellijIdeaCommunity("2024.3")
+        intellijIdeaCommunity("2024.2.3")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
