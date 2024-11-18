@@ -16,10 +16,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiQualifiedNamedElement;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
@@ -31,95 +34,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PIT4UAction extends AnAction {
     private static final Logger log = Logger.getInstance(PIT4UAction.class);
 
     PIT4UAction() {
         getTemplatePresentation().setIcon(PIT4UIcon.ICON);
-    }
-
-    private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
-        final var runConfig = runManager.findConfigurationByName("PIT4URunConfiguration");
-        if (runConfig != null) {
-            return runConfig;
-        }
-        final var newRunConfig = runManager.createConfiguration(
-                "PIT4URunConfiguration 1",
-                PIT4UConfigurationType.class
-        );
-        runManager.addConfiguration(newRunConfig);
-        runManager.setSelectedConfiguration(newRunConfig);
-        return newRunConfig;
-    }
-
-    private static void setDirectoryLabel(final AnActionEvent e, final PsiDirectoryNode psiDirectoryNode) {
-        final var javaDirectoryService = JavaDirectoryService.getInstance();
-        final var dirPackage = javaDirectoryService.getPackage(psiDirectoryNode.getValue());
-        if (dirPackage != null) {
-            e.getPresentation().setText("Mutate All Classes in " + dirPackage.getQualifiedName());
-        }
-    }
-
-    private static void setClassLabel(final AnActionEvent e, final ClassTreeNode classTreeNode) {
-        if (classTreeNode.getPsiClass() instanceof PsiQualifiedNamedElement psiQualifiedNamedElement) {
-            e.getPresentation().setText("Mutate Class " + psiQualifiedNamedElement.getQualifiedName());
-        }
-    }
-
-    private static void setProjectLabel(final AnActionEvent e) {
-        final var project = e.getProject();
-        if (project == null) {
-            return;
-        }
-        e.getPresentation().setText("Mutate Project " + project.getName());
-    }
-
-    private static Optional<ExecutionEnvironment> getExecutionEnvironmentBuilder(
-            final RunnerAndConfigurationSettings runConfig) {
-        try {
-            return Optional.of(ExecutionEnvironmentBuilder.create(DefaultRunExecutor.getRunExecutorInstance(), runConfig)
-                    .activeTarget()
-                    .build()
-            );
-        } catch (final ExecutionException ex) {
-            log.error("failed to create execution environment", ex);
-            return Optional.empty();
-        }
-    }
-
-    private static PIT4UEditorStatus getPit4UEditorStatus(final AnActionEvent e, final String projectName, final String basePath) {
-        final var fullyQualifiedPackage = getFullyQualifiedPackage(e.getData(CommonDataKeys.PSI_ELEMENT), projectName);
-        final var status = new PIT4UEditorStatus();
-        final var path = Path.of(basePath);
-        status.setReportDir(path.resolve("target").toString());
-        status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
-        status.setTargetClasses(fullyQualifiedPackage + "*");
-        status.setTargetTests(fullyQualifiedPackage + "*");
-        return status;
-    }
-
-    private static String getFullyQualifiedPackage(final PsiElement element, final String projectName) {
-        if (element instanceof PsiQualifiedNamedElement qualifiedNamedElement) {
-            return qualifiedNamedElement.getQualifiedName();
-        }
-        if (element instanceof PsiDirectory psiDirectory) {
-            final var javaDirectoryService = JavaDirectoryService.getInstance();
-            final var dirPackage = javaDirectoryService.getPackage(psiDirectory);
-            if (dirPackage != null) {
-                return dirPackage.getQualifiedName();
-            }
-        }
-        return projectName;
-    }
-
-    private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
-        final var executionBuilder = getExecutionEnvironmentBuilder(runConfig);
-        if (executionBuilder.isEmpty()) {
-            log.error("ExecutionBuilder is empty");
-            return;
-        }
-        ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
     }
 
     private static boolean shouldShow(final AnActionEvent e) {
@@ -147,6 +68,91 @@ public class PIT4UAction extends AnAction {
                         .getContainingDirectory()
                         .getVirtualFile()
                         .getPath().contains("test");
+    }
+
+    private static void setDirectoryLabel(final AnActionEvent e, final PsiDirectoryNode psiDirectoryNode) {
+        final var javaDirectoryService = JavaDirectoryService.getInstance();
+        final var dirPackage = javaDirectoryService.getPackage(psiDirectoryNode.getValue());
+        if (dirPackage != null) {
+            e.getPresentation().setText("Mutate All Classes in " + dirPackage.getQualifiedName());
+        }
+    }
+
+    private static void setClassLabel(final AnActionEvent e, final ClassTreeNode classTreeNode) {
+        if (classTreeNode.getPsiClass() instanceof PsiQualifiedNamedElement psiQualifiedNamedElement) {
+            e.getPresentation().setText("Mutate Class " + psiQualifiedNamedElement.getQualifiedName());
+        }
+    }
+
+    private static void setProjectLabel(final AnActionEvent e) {
+        final var project = e.getProject();
+        if (project != null) {
+            e.getPresentation().setText("Mutate Project " + project.getName());
+        }
+    }
+
+    private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
+        final var runConfig = runManager.findConfigurationByName("PIT4URunConfiguration");
+        if (runConfig != null) {
+            return runConfig;
+        }
+        final var newRunConfig = runManager.createConfiguration(
+                "PIT4URunConfiguration 1",
+                PIT4UConfigurationType.class
+        );
+        runManager.addConfiguration(newRunConfig);
+        runManager.setSelectedConfiguration(newRunConfig);
+        return newRunConfig;
+    }
+
+    private static PIT4UEditorStatus getPit4UEditorStatus(final AnActionEvent e, final Project project, final String basePath) {
+        final var selectedFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
+        if (selectedFile == null) {
+            return null;
+        }
+        final var status = new PIT4UEditorStatus();
+        final var path = Path.of(basePath);
+        status.setReportDir(path.resolve("target").toString());
+        status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
+        final var fullyQualifiedPackages = getFullyQualifiedPackages(selectedFile, project);
+        status.setTargetClasses(fullyQualifiedPackages);
+        status.setTargetTests(fullyQualifiedPackages);
+        return status;
+    }
+
+    private static String getFullyQualifiedPackages(final VirtualFile virtualFile, final Project project) {
+        final var javaFiles = FileTypeIndex.getFiles(
+                JavaFileType.INSTANCE,
+                new DirectoryScope(project, virtualFile, true)
+        );
+        return javaFiles.stream()
+                .map(PsiManager.getInstance(project)::findFile)
+                .filter(e -> e instanceof PsiJavaFile)
+                .map(e -> ((PsiJavaFile) e).getPackageName())
+                .distinct()
+                .collect(Collectors.joining(".*, "));
+    }
+
+    private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
+        final var executionBuilder = getExecutionEnvironmentBuilder(runConfig);
+        if (executionBuilder.isEmpty()) {
+            log.error("ExecutionBuilder is empty");
+            return;
+        }
+        ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
+    }
+
+    private static Optional<ExecutionEnvironment> getExecutionEnvironmentBuilder(
+            final RunnerAndConfigurationSettings runConfig) {
+        try {
+            return Optional.of(ExecutionEnvironmentBuilder.create(DefaultRunExecutor.getRunExecutorInstance(), runConfig)
+                    .activeTarget()
+                    .build()
+            );
+        } catch (final ExecutionException ex) {
+            log.error("failed to create execution environment", ex);
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -185,7 +191,7 @@ public class PIT4UAction extends AnAction {
             log.error("PIT4URunConfiguration wasn't found!");
             return;
         }
-        config.setPit4UEditorStatus(getPit4UEditorStatus(e, project.getName(), project.getBasePath()));
+        config.setPit4UEditorStatus(getPit4UEditorStatus(e, project, project.getBasePath()));
         executeRunConfiguration(runConfig);
     }
 }
