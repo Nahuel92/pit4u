@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.externalSystem.ExternalSystemModulePropertyManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
@@ -29,6 +30,7 @@ import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
 import io.github.nahuel92.pit4u.icons.PIT4UIcon;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.utils.MavenUtil;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -65,7 +67,15 @@ public class PIT4UAction extends AnAction {
                 !psiClass.getContainingFile()
                         .getContainingDirectory()
                         .getVirtualFile()
-                        .getPath().contains("test");
+                        .getPath()
+                        .contains("test");
+    }
+
+    private static boolean isProjectRoot(final Project project, final PsiDirectory psiDirectory) {
+        if (project == null || project.getBasePath() == null) {
+            return false;
+        }
+        return project.getBasePath().equals(psiDirectory.getVirtualFile().getPath());
     }
 
     private static void setProjectLabel(final AnActionEvent e) {
@@ -108,13 +118,30 @@ public class PIT4UAction extends AnAction {
 
     private static PIT4UEditorStatus getPit4UEditorStatus(final AnActionEvent e, final Project project, final String basePath) {
         final var status = new PIT4UEditorStatus();
-        final var path = Path.of(basePath);
-        status.setReportDir(path.resolve("target").toString());
-        status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
+        setSourceAndReportDirs(e, status, basePath);
         final var fullyQualifiedPackages = getFullyQualifiedPackages(e, project);
         status.setTargetClasses(fullyQualifiedPackages);
         status.setTargetTests(fullyQualifiedPackages);
         return status;
+    }
+
+    private static void setSourceAndReportDirs(final AnActionEvent e, final PIT4UEditorStatus status, final String basePath) {
+        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        if (module == null) {
+            return;
+        }
+        final var path = Path.of(basePath);
+        final var propManager = ExternalSystemModulePropertyManager.getInstance(module);
+        if (MavenUtil.isMavenModule(module)) {
+            status.setReportDir(path.resolve("target").toString());
+            status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
+            return;
+        }
+        if ("gradle".equalsIgnoreCase(propManager.getExternalSystemId())) {
+            status.setReportDir(path.resolve("build").toString());
+            status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
+        }
+        log.info("Module is not using Maven or Gradle as build system!");
     }
 
     private static String getFullyQualifiedPackages(final AnActionEvent event, final Project project) {
@@ -139,7 +166,7 @@ public class PIT4UAction extends AnAction {
     }
 
     private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
-        final var executionBuilder = getExecutionEnvironmentBuilder(runConfig);
+        final var executionBuilder = getExecEnvBuilder(runConfig);
         if (executionBuilder.isEmpty()) {
             log.error("ExecutionBuilder is empty");
             return;
@@ -147,8 +174,7 @@ public class PIT4UAction extends AnAction {
         ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
     }
 
-    private static Optional<ExecutionEnvironment> getExecutionEnvironmentBuilder(
-            final RunnerAndConfigurationSettings runConfig) {
+    private static Optional<ExecutionEnvironment> getExecEnvBuilder(final RunnerAndConfigurationSettings runConfig) {
         try {
             return Optional.of(ExecutionEnvironmentBuilder.create(DefaultRunExecutor.getRunExecutorInstance(), runConfig)
                     .activeTarget()
@@ -166,13 +192,6 @@ public class PIT4UAction extends AnAction {
         return ActionUpdateThread.BGT;
     }
 
-    private static boolean isProjectRoot(final Project project, final PsiDirectory psiDirectory) {
-        if (project == null || project.getBasePath() == null) {
-            return false;
-        }
-        return project.getBasePath().equals(psiDirectory.getVirtualFile().getPath());
-    }
-
     @Override
     public void update(@NotNull final AnActionEvent e) {
         if (!shouldShow(e)) {
@@ -180,15 +199,12 @@ public class PIT4UAction extends AnAction {
             return;
         }
         e.getPresentation().setEnabledAndVisible(true);
-        final var navigatable = e.getData(CommonDataKeys.NAVIGATABLE);
-        if (navigatable == null) {
-            return;
-        }
-        switch (navigatable) {
+        final var element = e.getData(CommonDataKeys.PSI_ELEMENT);
+        switch (element) {
             case PsiDirectory psiDirectory when isProjectRoot(e.getProject(), psiDirectory) -> setProjectLabel(e);
             case PsiDirectory psiDirectory -> setDirectoryLabel(e, psiDirectory);
             case PsiClass psiClass -> setClassLabel(e, psiClass);
-            default -> throw new IllegalStateException("Unexpected value: " + navigatable);
+            case null, default -> throw new IllegalStateException("Unexpected value: " + element);
         }
     }
 
