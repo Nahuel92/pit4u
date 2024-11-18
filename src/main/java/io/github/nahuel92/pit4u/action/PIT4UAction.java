@@ -8,8 +8,6 @@ import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ExecutionEnvironmentBuilder;
 import com.intellij.ide.highlighter.JavaFileType;
-import com.intellij.ide.projectView.impl.nodes.ClassTreeNode;
-import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -17,12 +15,12 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiQualifiedNamedElement;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
@@ -70,25 +68,28 @@ public class PIT4UAction extends AnAction {
                         .getPath().contains("test");
     }
 
-    private static void setDirectoryLabel(final AnActionEvent e, final PsiDirectoryNode psiDirectoryNode) {
-        final var javaDirectoryService = JavaDirectoryService.getInstance();
-        final var dirPackage = javaDirectoryService.getPackage(psiDirectoryNode.getValue());
-        if (dirPackage != null) {
-            e.getPresentation().setText("Mutate All Classes in " + dirPackage.getQualifiedName());
-        }
-    }
-
-    private static void setClassLabel(final AnActionEvent e, final ClassTreeNode classTreeNode) {
-        if (classTreeNode.getPsiClass() instanceof PsiQualifiedNamedElement psiQualifiedNamedElement) {
-            e.getPresentation().setText("Mutate Class " + psiQualifiedNamedElement.getQualifiedName());
-        }
-    }
-
     private static void setProjectLabel(final AnActionEvent e) {
         final var project = e.getProject();
         if (project != null) {
-            e.getPresentation().setText("Mutate Project " + project.getName());
+            e.getPresentation().setText("Mutate all in " + project.getName());
         }
+    }
+
+    private static void setDirectoryLabel(final AnActionEvent e, final PsiDirectory psiDirectory) {
+        final var javaDirectoryService = JavaDirectoryService.getInstance();
+        final var dirPackage = javaDirectoryService.getPackage(psiDirectory);
+        e.getPresentation().setText("Mutate all in " + getDirectoryName(dirPackage, psiDirectory));
+    }
+
+    private static String getDirectoryName(final PsiPackage dirPackage, final PsiDirectory psiDirectory) {
+        if (dirPackage == null || dirPackage.getQualifiedName().isBlank()) {
+            return psiDirectory.getName();
+        }
+        return dirPackage.getQualifiedName();
+    }
+
+    private static void setClassLabel(final AnActionEvent e, final PsiClass psiClass) {
+        e.getPresentation().setText("Mutate " + psiClass.getQualifiedName());
     }
 
     private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
@@ -106,31 +107,35 @@ public class PIT4UAction extends AnAction {
     }
 
     private static PIT4UEditorStatus getPit4UEditorStatus(final AnActionEvent e, final Project project, final String basePath) {
-        final var selectedFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        if (selectedFile == null) {
-            return null;
-        }
         final var status = new PIT4UEditorStatus();
         final var path = Path.of(basePath);
         status.setReportDir(path.resolve("target").toString());
         status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
-        final var fullyQualifiedPackages = getFullyQualifiedPackages(selectedFile, project);
+        final var fullyQualifiedPackages = getFullyQualifiedPackages(e, project);
         status.setTargetClasses(fullyQualifiedPackages);
         status.setTargetTests(fullyQualifiedPackages);
         return status;
     }
 
-    private static String getFullyQualifiedPackages(final VirtualFile virtualFile, final Project project) {
+    private static String getFullyQualifiedPackages(final AnActionEvent event, final Project project) {
+        if (event.getData(CommonDataKeys.PSI_ELEMENT) instanceof PsiQualifiedNamedElement psiQualifiedNamedElement) {
+            return psiQualifiedNamedElement.getQualifiedName();
+        }
+
+        final var selectedFile = event.getData(CommonDataKeys.VIRTUAL_FILE);
+        if (selectedFile == null) {
+            return null;
+        }
+
         final var javaFiles = FileTypeIndex.getFiles(
                 JavaFileType.INSTANCE,
-                new DirectoryScope(project, virtualFile, true)
+                new DirectoryScope(project, selectedFile, true)
         );
         return javaFiles.stream()
                 .map(PsiManager.getInstance(project)::findFile)
                 .filter(e -> e instanceof PsiJavaFile)
-                .map(e -> ((PsiJavaFile) e).getPackageName())
-                .distinct()
-                .collect(Collectors.joining(".*, "));
+                .map(e -> ((PsiJavaFile) e).getPackageName() + ".*")
+                .collect(Collectors.joining(","));
     }
 
     private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
@@ -161,6 +166,13 @@ public class PIT4UAction extends AnAction {
         return ActionUpdateThread.BGT;
     }
 
+    private static boolean isProjectRoot(final Project project, final PsiDirectory psiDirectory) {
+        if (project == null || project.getBasePath() == null) {
+            return false;
+        }
+        return project.getBasePath().equals(psiDirectory.getVirtualFile().getPath());
+    }
+
     @Override
     public void update(@NotNull final AnActionEvent e) {
         if (!shouldShow(e)) {
@@ -168,14 +180,15 @@ public class PIT4UAction extends AnAction {
             return;
         }
         e.getPresentation().setEnabledAndVisible(true);
-        final var navigatables = e.getData(CommonDataKeys.NAVIGATABLE_ARRAY);
-        if (navigatables == null || navigatables[0] == null) {
+        final var navigatable = e.getData(CommonDataKeys.NAVIGATABLE);
+        if (navigatable == null) {
             return;
         }
-        switch (navigatables[0]) {
-            case PsiDirectoryNode psiDirectoryNode -> setDirectoryLabel(e, psiDirectoryNode);
-            case ClassTreeNode classTreeNode -> setClassLabel(e, classTreeNode);
-            default -> setProjectLabel(e);
+        switch (navigatable) {
+            case PsiDirectory psiDirectory when isProjectRoot(e.getProject(), psiDirectory) -> setProjectLabel(e);
+            case PsiDirectory psiDirectory -> setDirectoryLabel(e, psiDirectory);
+            case PsiClass psiClass -> setClassLabel(e, psiClass);
+            default -> throw new IllegalStateException("Unexpected value: " + navigatable);
         }
     }
 
