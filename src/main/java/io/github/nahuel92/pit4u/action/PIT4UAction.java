@@ -108,7 +108,7 @@ public class PIT4UAction extends AnAction {
             return runConfig;
         }
         final var newRunConfig = runManager.createConfiguration(
-                "PIT4URunConfiguration 1",
+                "PIT4U Action",
                 PIT4UConfigurationType.class
         );
         runManager.addConfiguration(newRunConfig);
@@ -181,7 +181,7 @@ public class PIT4UAction extends AnAction {
                     .build()
             );
         } catch (final ExecutionException ex) {
-            log.error("failed to create execution environment", ex);
+            log.error("Failed to create execution environment", ex);
             return Optional.empty();
         }
     }
