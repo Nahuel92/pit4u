@@ -7,6 +7,7 @@
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog, or using contextual actions
     on the top-level project directory, on a package or a class.
   ]]></description>
+    <version>0.2.0</version>
 
     <change-notes><![CDATA[
     <h4>Version 0.2.0</h4>
