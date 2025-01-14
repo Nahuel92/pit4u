@@ -7,11 +7,10 @@
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog, or using contextual actions
     on the top-level project directory, on a package or a class.
   ]]></description>
-    <version>0.2.0</version>
 
     <change-notes><![CDATA[
     <h4>Version 0.2.0</h4>
-    <p><em>New release that brings a contextual action and small QOL improvements.</em></p>
+    <p><em>New release that introduces a contextual action and small quality-of-life improvements. From now on, IDEA 2024.3+ is required</em></p>
     <h5>Changes</h5>
     <ul>
         <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
