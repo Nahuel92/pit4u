@@ -4,11 +4,23 @@
     <vendor url="https://github.com/Nahuel92/pit4u">PIT4U</vendor>
     <description><![CDATA[
     Plugin for IntelliJ that enables you to run PIT mutation tests (pitest.org) directly from your IDE
-    via a new configuration that you can find in the 'Run/Debug Configurations' dialog.
+    via a new configuration that you can find in the 'Run/Debug Configurations' dialog, or using contextual actions
+    on the top-level project directory, on a package or a class.
   ]]></description>
-    <version>0.1.6</version>
+    <version>0.2.0</version>
 
     <change-notes><![CDATA[
+    <h4>Version 0.2.0</h4>
+    <p><em>New release that brings contextual action and small QOL improvements.</em></p>
+    <h5>Changes</h5>
+    <ul>
+        <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
+        <li>Fixed link to report misbehavior. Now it won't show if it wasn't generated due to an execution error</li>
+        <li>Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)</li>
+    </ul>
+    <h5>Known issues</h5>
+    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
+
     <h4>Version 0.1.6</h4>
     <p><em>New release to address incompatibility with IDEA 2024.3.</em></p>
     <h5>Changes</h5>
