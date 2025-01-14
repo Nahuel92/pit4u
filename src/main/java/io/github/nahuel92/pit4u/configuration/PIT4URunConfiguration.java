@@ -18,6 +18,7 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
@@ -32,6 +33,7 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -75,13 +77,21 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                         new ProcessAdapter() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                final var reportLink = "file:///" +
-                                        Path.of(pit4UEditorStatus.getReportDir()).toAbsolutePath() +
-                                        "/index.html";
-                                consoleView.printHyperlink(
-                                        "Report ready, click to open it in your browser",
-                                        new OpenUrlHyperlinkInfo(reportLink)
-                                );
+                                final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
+                                        .toAbsolutePath()
+                                        .resolve("index.html");
+                                if (Files.exists(reportIndexPath)) {
+                                    final var reportLink = "file:///" + reportIndexPath;
+                                    consoleView.printHyperlink(
+                                            "Report ready, click to open it in your browser",
+                                            new OpenUrlHyperlinkInfo(reportLink)
+                                    );
+                                } else {
+                                    consoleView.print(
+                                            "Report not available. Please check Pitest output above for information on the error",
+                                            ConsoleViewContentType.ERROR_OUTPUT
+                                    );
+                                }
                             }
                         }
                 );

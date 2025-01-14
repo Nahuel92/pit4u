@@ -2,7 +2,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.1.0"
+    id("org.jetbrains.intellij.platform") version "2.2.1"
 }
 
 group = "io.github.nahuel92"
@@ -30,7 +30,7 @@ intellijPlatform {
     buildSearchableOptions.set(false)
 }
 
-val pitVersion = "1.17.1"
+val pitVersion = "1.17.4"
 
 dependencies {
     implementation("org.pitest:pitest:$pitVersion")
@@ -38,14 +38,13 @@ dependencies {
     implementation("org.pitest:pitest-command-line:$pitVersion")
     implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
-        intellijIdeaCommunity("2024.2.3")
+        intellijIdeaCommunity("2024.3.1.1")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
 
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
 
         testFramework(TestFrameworkType.Platform)
     }
