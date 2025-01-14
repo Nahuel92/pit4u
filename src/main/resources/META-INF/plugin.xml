@@ -16,7 +16,7 @@
     <ul>
         <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
         <li>Fixed link to report misbehavior. Now it won't show if it wasn't generated due to an execution error</li>
-        <li>Updated dependencies (Pitest and IntelliJ Platform SDK)</li>
+        <li>Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)</li>
     </ul>
     <h5>Known issues</h5>
     <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
