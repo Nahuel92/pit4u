@@ -11,21 +11,12 @@
 
     <change-notes><![CDATA[
     <h4>Version 0.2.0</h4>
-    <p><em>New release that brings contextual action and small QOL improvements.</em></p>
+    <p><em>New release that brings a contextual action and small QOL improvements.</em></p>
     <h5>Changes</h5>
     <ul>
         <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
         <li>Fixed link to report misbehavior. Now it won't show if it wasn't generated due to an execution error</li>
         <li>Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)</li>
-    </ul>
-    <h5>Known issues</h5>
-    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
-
-    <h4>Version 0.2.0</h4>
-    <p><em>New release that adds a contextual action.</em></p>
-    <h5>Changes</h5>
-    <ul>
-        <li>Added a contextual action</li>
     </ul>
     <h5>Known issues</h5>
     <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
@@ -109,6 +100,7 @@
             <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
         </action>
     </actions>
+
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
     </extensions>
