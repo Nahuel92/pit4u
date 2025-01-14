@@ -8,16 +8,9 @@ plugins {
 
 group = "io.github.nahuel92"
 
-// Plugin version
-val pluginVersion = "0.2.0"
-val javaVersion = "21"
-// IntelliJ version
 val sinceVersion = "243"
 val untilVersion = "243.*"
-val intellijIdeaCommunityVersion = "2024.3.1.1"
-// PIT version
 val pitVersion = "1.17.4"
-val pitestJunit5PluginVersion = "1.2.1"
 
 repositories {
     mavenCentral()
@@ -32,7 +25,7 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = pluginVersion
+        version = "0.2.0"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set(sinceVersion)
@@ -53,11 +46,11 @@ intellijPlatform {
 
 dependencies {
     implementation("org.pitest:pitest:$pitVersion")
-    implementation("org.pitest:pitest-junit5-plugin:$pitestJunit5PluginVersion")
+    implementation("org.pitest:pitest-junit5-plugin:1.2.1")
     implementation("org.pitest:pitest-command-line:$pitVersion")
     implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
-        intellijIdeaCommunity(intellijIdeaCommunityVersion)
+        intellijIdeaCommunity("2024.3.1.1")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
@@ -71,12 +64,11 @@ dependencies {
 
 tasks {
     withType<JavaCompile> {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
 
     patchPluginXml {
-        version = "$pluginVersion"
         sinceBuild.set(sinceVersion)
         untilBuild.set(untilVersion)
     }
