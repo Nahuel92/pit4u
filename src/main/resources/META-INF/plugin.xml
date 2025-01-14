@@ -11,7 +11,7 @@
 
     <change-notes><![CDATA[
     <h4>Version 0.2.0</h4>
-    <p><em>New release that brings contextual action and small QOL improvements.</em></p>
+    <p><em>New release that brings a contextual action and small QOL improvements.</em></p>
     <h5>Changes</h5>
     <ul>
         <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
@@ -93,6 +93,13 @@
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
+
+    <actions>
+        <action id="io.github.nahuel92.pit4u.action.PIT4UAction" class="io.github.nahuel92.pit4u.action.PIT4UAction"
+                text="Pit4UPopUpMenuAction" description="Mutate all classes in this package">
+            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
+        </action>
+    </actions>
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>

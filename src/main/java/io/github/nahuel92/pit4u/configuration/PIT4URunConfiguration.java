@@ -41,7 +41,7 @@ import java.util.List;
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
     private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
-    private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
+    private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
@@ -73,25 +73,24 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
             @NotNull
             protected OSProcessHandler startProcess() throws ExecutionException {
                 final var osProcessHandler = super.startProcess();
+                final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
+                        .resolve("index.html")
+                        .toAbsolutePath();
                 osProcessHandler.addProcessListener(
                         new ProcessAdapter() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
-                                        .toAbsolutePath()
-                                        .resolve("index.html");
                                 if (Files.exists(reportIndexPath)) {
-                                    final var reportLink = "file:///" + reportIndexPath;
                                     consoleView.printHyperlink(
-                                            "Report ready, click to open it in your browser",
-                                            new OpenUrlHyperlinkInfo(reportLink)
+                                            "Report ready, click to open it on your browser",
+                                            new OpenUrlHyperlinkInfo("file:///" + reportIndexPath)
                                     );
-                                } else {
-                                    consoleView.print(
-                                            "Report not available. Please check Pitest output above for information on the error",
-                                            ConsoleViewContentType.ERROR_OUTPUT
-                                    );
+                                    return;
                                 }
+                                consoleView.print(
+                                        "Pitest execution failed. Please check the output above for more information",
+                                        ConsoleViewContentType.ERROR_OUTPUT
+                                );
                             }
                         }
                 );
@@ -137,5 +136,9 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     @Override
     public void dispose() {
         log.info("PIT4URunConfiguration Disposed");
+    }
+
+    public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
+        this.pit4UEditorStatus = pit4UEditorStatus;
     }
 }
