@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("java")
@@ -6,6 +7,17 @@ plugins {
 }
 
 group = "io.github.nahuel92"
+
+// Plugin version
+val pluginVersion = "0.2.0"
+val javaVersion = "21"
+// IntelliJ version
+val sinceVersion = "243"
+val untilVersion = "243.*"
+val intellijIdeaCommunityVersion = "2024.3.1.1"
+// PIT version
+val pitVersion = "1.17.4"
+val pitestJunit5PluginVersion = "1.2.1"
 
 repositories {
     mavenCentral()
@@ -20,25 +32,32 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.2.0"
+        version = pluginVersion
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
-            sinceBuild.set("242")
-            untilBuild.set("243.*")
+            sinceBuild.set(sinceVersion)
+            untilBuild.set(untilVersion)
+        }
+    }
+    pluginVerification {
+        ides {
+            select {
+                channels = listOf(ProductRelease.Channel.RELEASE)
+                sinceBuild = sinceVersion
+                untilBuild = untilVersion
+            }
         }
     }
     buildSearchableOptions.set(false)
 }
 
-val pitVersion = "1.17.4"
-
 dependencies {
     implementation("org.pitest:pitest:$pitVersion")
-    implementation("org.pitest:pitest-junit5-plugin:1.2.1")
+    implementation("org.pitest:pitest-junit5-plugin:$pitestJunit5PluginVersion")
     implementation("org.pitest:pitest-command-line:$pitVersion")
     implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.1.1")
+        intellijIdeaCommunity(intellijIdeaCommunityVersion)
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
@@ -52,13 +71,14 @@ dependencies {
 
 tasks {
     withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     patchPluginXml {
-        sinceBuild.set("242")
-        untilBuild.set("243.*")
+        version = "$pluginVersion"
+        sinceBuild.set(sinceVersion)
+        untilBuild.set(untilVersion)
     }
 
     signPlugin {
