@@ -20,6 +20,7 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
@@ -37,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +47,7 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         implements Disposable {
     public static final XmlMapper XML_MAPPER = new XmlMapper();
     private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
-    private final PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
+    private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
@@ -77,33 +79,41 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
             @NotNull
             protected OSProcessHandler startProcess() throws ExecutionException {
                 final var osProcessHandler = super.startProcess();
+                final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
+                        .resolve("index.html")
+                        .toAbsolutePath();
                 osProcessHandler.addProcessListener(
                         new ProcessAdapter() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                final var reportLink = "file:///" + Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve("index.html").toAbsolutePath();
-                                consoleView.printHyperlink(
-                                        "Report ready, click to open it in your browser",
-                                        new OpenUrlHyperlinkInfo(reportLink)
-                                );
-
-                                final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .toAbsolutePath().resolve("mutations.xml");
-
-                                List<PITLine> results;
-                                try {
-                                    results = XML_MAPPER.readValue(
-                                            path.toFile(),
-                                            new TypeReference<>() {
-                                            }
+                                if (Files.exists(reportIndexPath)) {
+                                    consoleView.printHyperlink(
+                                            "Report ready, click to open it on your browser",
+                                            new OpenUrlHyperlinkInfo("file:///" + reportIndexPath)
                                     );
-                                } catch (final IOException e) {
-                                    throw new RuntimeException(e);
-                                }
 
-                                final var highlighter = new Highlighter();
-                                highlighter.updateMarkers(getProject(), results);
+                                    final var path = Path.of(pit4UEditorStatus.getReportDir())
+                                            .toAbsolutePath().resolve("mutations.xml");
+
+                                    List<PITLine> results;
+                                    try {
+                                        results = XML_MAPPER.readValue(
+                                                path.toFile(),
+                                                new TypeReference<>() {
+                                                }
+                                        );
+                                    } catch (final IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+
+                                    final var highlighter = new Highlighter();
+                                    highlighter.updateMarkers(getProject(), results);
+                                    return;
+                                }
+                                consoleView.print(
+                                        "Pitest execution failed. Please check the output above for more information",
+                                        ConsoleViewContentType.ERROR_OUTPUT
+                                );
                             }
                         }
                 );
@@ -149,5 +159,9 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     @Override
     public void dispose() {
         log.info("PIT4URunConfiguration Disposed");
+    }
+
+    public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
+        this.pit4UEditorStatus = pit4UEditorStatus;
     }
 }

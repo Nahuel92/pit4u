@@ -33,7 +33,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     private TextFieldWithBrowseButton targetTests;
     private TextFieldWithBrowseButton sourceDir;
     private TextFieldWithBrowseButton reportDir;
-    private TextFieldWithBrowseButton otherParams;
+    private OtherParamsButton otherParams;
 
     public PIT4USettingsEditor(final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
         this.project = project;
@@ -134,11 +134,10 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
                                                 final Consumer<String> editorStatusConsumer) {
         return e -> {
             new BrowseFolderActionListener<>(
-                    title,
-                    null,
                     field,
                     project,
-                    FileChooserDescriptorFactory.createSingleFolderDescriptor(),
+                    FileChooserDescriptorFactory.createSingleFolderDescriptor()
+                            .withTitle(title),
                     TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT
             ).actionPerformed(e);
             editorStatusConsumer.accept(field.getText());
