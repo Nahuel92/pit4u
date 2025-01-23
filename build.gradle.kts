@@ -9,7 +9,7 @@ plugins {
 group = "io.github.nahuel92"
 
 val sinceVersion = "243"
-val untilVersion = "243.*"
+val untilVersion = "251.*"
 val pitVersion = "1.17.4"
 
 repositories {
@@ -25,7 +25,7 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.2.0"
+        version = "0.2.1"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set(sinceVersion)
@@ -55,6 +55,7 @@ dependencies {
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
+        bundledPlugin("Coverage")
 
         pluginVerifier()
         zipSigner()

@@ -7,11 +7,20 @@
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog, or using contextual actions
     on the top-level project directory, on a package or a class.
   ]]></description>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 
     <change-notes><![CDATA[
+    <h4>Version 0.2.1</h4>
+    <p><em>New release that introduces code highlighting directly in the IDE.</em></p>
+    <h5>Changes</h5>
+    <ul>
+        <li>PIT4U now highlights your code and gives you insight without having to leave your IDE</li>
+    </ul>
+    <h5>Known issues</h5>
+    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
+
     <h4>Version 0.2.0</h4>
-    <p><em>New release that introduces a contextual action and small quality-of-life improvements. From now on, IDEA 2024.3+ is required</em></p>
+    <p><em>New release that introduces a contextual action and small quality-of-life improvements.<br>From now on, IDEA 2024.3+ is required</em></p>
     <h5>Changes</h5>
     <ul>
         <li>PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)</li>
@@ -93,6 +102,7 @@
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>com.intellij.gradle</depends>
+    <depends>Coverage</depends>
 
     <actions>
         <action id="io.github.nahuel92.pit4u.action.PIT4UAction" class="io.github.nahuel92.pit4u.action.PIT4UAction"
@@ -103,7 +113,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
-        <codeInsight.lineMarkerProvider language="JAVA"
-                                        implementationClass="io.github.nahuel92.pit4u.highlighter.Highlighter"/>
+        <coverageRunner implementation="io.github.nahuel92.pit4u.runner.MyCoverageRunner" order="last"/>
+        <coverageEngine implementation="io.github.nahuel92.pit4u.runner.MyCoverageEngine" order="last"/>
     </extensions>
 </idea-plugin>

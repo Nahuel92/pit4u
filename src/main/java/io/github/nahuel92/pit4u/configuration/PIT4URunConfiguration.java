@@ -1,7 +1,8 @@
 package io.github.nahuel92.pit4u.configuration;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.intellij.coverage.CoverageDataManager;
+import com.intellij.coverage.CoverageRunner;
+import com.intellij.coverage.CoverageSuitesBundle;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
@@ -21,7 +22,6 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -31,13 +31,11 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
-import io.github.nahuel92.pit4u.highlighter.Highlighter;
-import io.github.nahuel92.pit4u.highlighter.PITLine;
+import io.github.nahuel92.pit4u.runner.MyCoverageRunner;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -45,8 +43,7 @@ import java.util.List;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
-    public static final XmlMapper XML_MAPPER = new XmlMapper();
-    private final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
+    private static final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
@@ -82,38 +79,28 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                 final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
                         .resolve("index.html")
                         .toAbsolutePath();
+
                 osProcessHandler.addProcessListener(
                         new ProcessAdapter() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                if (Files.exists(reportIndexPath)) {
-                                    consoleView.printHyperlink(
-                                            "Report ready, click to open it on your browser",
-                                            new OpenUrlHyperlinkInfo("file:///" + reportIndexPath)
+                                if (!Files.exists(reportIndexPath)) {
+                                    consoleView.print(
+                                            "Pitest execution failed. Please check the output above for more information",
+                                            ConsoleViewContentType.ERROR_OUTPUT
                                     );
-
-                                    final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                            .toAbsolutePath().resolve("mutations.xml");
-
-                                    List<PITLine> results;
-                                    try {
-                                        results = XML_MAPPER.readValue(
-                                                path.toFile(),
-                                                new TypeReference<>() {
-                                                }
-                                        );
-                                    } catch (final IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-
-                                    final var highlighter = new Highlighter();
-                                    highlighter.updateMarkers(getProject(), results);
                                     return;
                                 }
-                                consoleView.print(
-                                        "Pitest execution failed. Please check the output above for more information",
-                                        ConsoleViewContentType.ERROR_OUTPUT
+                                final var path = Path.of(pit4UEditorStatus.getReportDir())
+                                        .resolve("mutations.xml")
+                                        .toAbsolutePath();
+                                final var coverageDataManager = CoverageDataManager
+                                        .getInstance(getProject());
+                                final var suite = coverageDataManager.addExternalCoverageSuite(
+                                        path.toFile(),
+                                        CoverageRunner.getInstance(MyCoverageRunner.class)
                                 );
+                                coverageDataManager.chooseSuitesBundle(new CoverageSuitesBundle(suite));
                             }
                         }
                 );
