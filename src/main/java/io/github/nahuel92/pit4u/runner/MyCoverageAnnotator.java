@@ -51,6 +51,20 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
         };
     }
 
+    private static PackageAnnotator.@NotNull ClassCoverageInfo minus(PackageAnnotator.ClassCoverageInfo thisSuiteCoverage, PackageAnnotator.ClassCoverageInfo currentCoverage) {
+        final var coverage = new PackageAnnotator.ClassCoverageInfo();
+        coverage.coveredBranchCount = thisSuiteCoverage.coveredBranchCount - currentCoverage.coveredBranchCount;
+        coverage.coveredClassCount = thisSuiteCoverage.coveredClassCount - currentCoverage.coveredClassCount;
+        coverage.coveredMethodCount = thisSuiteCoverage.coveredMethodCount - currentCoverage.coveredMethodCount;
+        coverage.fullyCoveredLineCount = thisSuiteCoverage.fullyCoveredLineCount - currentCoverage.fullyCoveredLineCount;
+        coverage.totalClassCount = thisSuiteCoverage.totalClassCount - currentCoverage.totalClassCount;
+        coverage.partiallyCoveredLineCount = thisSuiteCoverage.partiallyCoveredLineCount - currentCoverage.partiallyCoveredLineCount;
+        coverage.totalBranchCount = thisSuiteCoverage.totalBranchCount - currentCoverage.totalBranchCount;
+        coverage.totalLineCount = thisSuiteCoverage.totalLineCount - currentCoverage.totalLineCount;
+        coverage.totalMethodCount = thisSuiteCoverage.totalMethodCount - currentCoverage.totalMethodCount;
+        return coverage;
+    }
+
     private void annotate(final CoverageSuitesBundle suite, final CoverageDataManager dataManager, final CoverageInfoCollector collector) {
         final var classCoverage = new HashMap<String, PackageAnnotator.ClassCoverageInfo>();
         final var flattenPackageCoverage = new HashMap<String, PackageAnnotator.PackageCoverageInfo>();
@@ -74,24 +88,28 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
                 continue;
             }
             for (final var classInfo : xmlReport.getClasses()) {
-                final var currentCoverage = classCoverage.putIfAbsent(
+                final var currentCoverage = classCoverage.computeIfAbsent(
                         classInfo.name,
-                        new PackageAnnotator.ClassCoverageInfo()
+                        k -> new PackageAnnotator.ClassCoverageInfo()
                 );
                 final var thisSuiteCoverage = getCoverageForClass(classInfo);
 
                 // apply delta
-                //final var coverage = thisSuiteCoverage - currentCoverage;
-                //currentCoverage.append(coverage);
+                final var coverage = minus(thisSuiteCoverage, currentCoverage);
+                currentCoverage.append(coverage);
 
                 final var packageName = StringUtil.getPackageName(classInfo.name);
                 final var virtualFile = findFile(packageName, classInfo.fileName, sourceRoots);
 
-                final var a = flattenPackageCoverage.putIfAbsent(packageName, new PackageAnnotator.PackageCoverageInfo());
-                //a.append(coverage);
+                flattenPackageCoverage.computeIfAbsent(
+                        packageName,
+                        k -> new PackageAnnotator.PackageCoverageInfo()
+                ).append(coverage);
                 if (virtualFile != null) {
-                    final var b = flattenDirectoryCoverage.putIfAbsent(virtualFile, new PackageAnnotator.PackageCoverageInfo());
-                    //b.append(coverage);
+                    flattenDirectoryCoverage.computeIfAbsent(
+                            virtualFile,
+                            k -> new PackageAnnotator.PackageCoverageInfo()
+                    ).append(coverage);
                 }
             }
         }
