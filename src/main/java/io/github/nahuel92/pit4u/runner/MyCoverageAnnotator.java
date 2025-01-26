@@ -82,11 +82,11 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
             if (!(xmlSuite instanceof MyCoverageSuite s)) {
                 continue;
             }
-
             final var xmlReport = s.getReportData();
             if (xmlReport == null) {
                 continue;
             }
+
             for (final var classInfo : xmlReport.getClasses()) {
                 final var currentCoverage = classCoverage.computeIfAbsent(
                         classInfo.name,
@@ -105,6 +105,7 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
                         packageName,
                         k -> new PackageAnnotator.PackageCoverageInfo()
                 ).append(coverage);
+
                 if (virtualFile != null) {
                     flattenDirectoryCoverage.computeIfAbsent(
                             virtualFile,
@@ -119,10 +120,10 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
                 .entrySet()
                 .stream()
                 .collect(Collectors.groupingBy(e -> AnalysisUtils.getSourceToplevelFQName(e.getKey())))
-                .forEach((key, value) -> {
+                .forEach((k, v) -> {
                     final var coverage = new PackageAnnotator.ClassCoverageInfo();
-                    value.forEach(r -> coverage.append(r.getValue()));
-                    collector.addClass(key, coverage);
+                    v.forEach(r -> coverage.append(r.getValue()));
+                    collector.addClass(k, coverage);
                 });
 
         JavaCoverageClassesAnnotator.annotatePackages(flattenPackageCoverage, collector);
@@ -130,8 +131,11 @@ public final class MyCoverageAnnotator extends JavaCoverageAnnotator {
     }
 
     private VirtualFile findFile(String packageName, String fileName, Collection<VirtualFile> sourceRoots) {
-        if (fileName == null) return null;
+        if (fileName == null) {
+            return null;
+        }
         final var path = MyCoverageSuite.getPath(packageName, fileName);
+
         for (final var root : sourceRoots) {
             final var file = root.findFileByRelativePath(path);
             if (file == null) {

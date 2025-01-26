@@ -5,6 +5,10 @@ import com.intellij.coverage.CoverageEngine;
 import com.intellij.coverage.CoverageRunner;
 import com.intellij.coverage.CoverageSuite;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.report.XMLProjectData;
 import io.github.nahuel92.pit4u.highlighter.Mutation;
@@ -17,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class MyCoverageRunner extends CoverageRunner {
@@ -30,7 +35,7 @@ public class MyCoverageRunner extends CoverageRunner {
         throw new UnsupportedOperationException("Should not be called");
     }
 
-    public XMLProjectData loadCoverageData(final File xmlFile) {
+    public XMLProjectData loadCoverageData(final File xmlFile, final Project project) {
         log.info("Executing loadCoverageData(xmlFile)...");
 
         Mutations results;
@@ -48,19 +53,37 @@ public class MyCoverageRunner extends CoverageRunner {
         final var filesInfo = new ArrayList<XMLProjectData.FileInfo>();
 
 
+        final var psiFacade = JavaPsiFacade.getInstance(project);
+
+
         for (final var mutatedClass : mutationsByClass.entrySet()) {
+            final var psiClass = psiFacade.findClass(
+                    mutatedClass.getKey(),
+                    GlobalSearchScope.allScope(project)
+            );
+
+            int missedLines = 0;
+            int missedMethods = 0;
+            if (psiClass != null) {
+                final var document = FileDocumentManager.getInstance()
+                        .getDocument(psiClass.getContainingFile().getVirtualFile());
+                if (document != null) {
+                    missedLines = document.getLineCount();
+                    missedMethods = psiClass.getMethods().length;
+                }
+            }
+
             var coveredLines = 0;
-            var uncoveredLines = 0;
             var sourceFile = "";
 
             final var linesInfo = new ArrayList<XMLProjectData.LineInfo>();
+            final var methods = new HashSet<String>();
             for (final var mutation : mutatedClass.getValue()) {
                 sourceFile = mutation.sourceFile();
                 if (mutation.status() == Mutation.Status.KILLED) {
                     coveredLines++;
-                }
-                if (mutation.status() == Mutation.Status.NO_COVERAGE) {
-                    uncoveredLines++;
+                    missedLines--;
+                    methods.add(mutation.mutatedMethod());
                 }
 
                 //
@@ -73,17 +96,21 @@ public class MyCoverageRunner extends CoverageRunner {
                 );
                 linesInfo.add(lineInfo);
             }
+
+            missedMethods -= methods.size();
+
+
             final var classInfo = new XMLProjectData.ClassInfo(
                     mutatedClass.getKey(),
                     sourceFile,
-                    uncoveredLines,
+                    missedLines,
                     coveredLines,
                     0,
                     0,
                     0,
                     0,
-                    0,
-                    0
+                    missedMethods,
+                    methods.size()
             );
             classesInfo.add(classInfo);
 

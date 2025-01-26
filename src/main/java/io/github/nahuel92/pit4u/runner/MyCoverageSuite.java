@@ -3,6 +3,7 @@ package io.github.nahuel92.pit4u.runner;
 import com.intellij.coverage.CoverageDataManager;
 import com.intellij.coverage.CoverageFileProvider;
 import com.intellij.coverage.JavaCoverageSuite;
+import com.intellij.coverage.analysis.AnalysisUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.rt.coverage.data.ProjectData;
@@ -46,7 +47,7 @@ public class MyCoverageSuite extends JavaCoverageSuite {
         if (packageName.isEmpty()) {
             return fileName;
         }
-        return "${AnalysisUtils.fqnToInternalName(packageName)}/$fileName";
+        return AnalysisUtils.fqnToInternalName(packageName) + fileName;
     }
 
     XMLProjectData getReportData() {
@@ -59,7 +60,7 @@ public class MyCoverageSuite extends JavaCoverageSuite {
             return null;
         }
         log.info("Calling loadCoverageData()...");
-        data = ((MyCoverageRunner) getRunner()).loadCoverageData(file);
+        data = ((MyCoverageRunner) getRunner()).loadCoverageData(file, getProject());
         log.info("loadCoverageData() finished");
         return data;
     }
