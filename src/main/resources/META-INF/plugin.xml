@@ -7,9 +7,18 @@
     via a new configuration that you can find in the 'Run/Debug Configurations' dialog, or using contextual actions
     on the top-level project directory, on a package or a class.
   ]]></description>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
 
     <change-notes><![CDATA[
+    <h4>Version 0.2.2</h4>
+    <p><em>New release to address a critical bug.</em></p>
+    <h5>Changes</h5>
+    <ul>
+        <li>Fixed a jUnit dependency issue that prevented the plugin from behaving as expected</li>
+    </ul>
+    <h5>Known issues</h5>
+    <p style="margin-left: 30px;">There are no known issues at this moment. Hooray!</p>
+
     <h4>Version 0.2.1</h4>
     <p><em>New release to support IDEA 2025.1</em></p>
     <h5>Changes</h5>
