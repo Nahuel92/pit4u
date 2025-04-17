@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.execution.util.JavaParametersUtil;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
@@ -15,13 +16,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 class JavaParametersCreator {
-    private static final Path PIT4U_LIB_PATH = PathManager.getPluginsDir()
-            .resolve("pit4u")
-            .resolve("lib");
-    private static final Path JPL_PATH = PIT4U_LIB_PATH.resolve("junit-platform-launcher-1.9.2.jar");
-    private static final List<String> PIT_LIBS = getPitLibs();
+    private static final Logger LOGGER = Logger.getInstance(JavaParametersCreator.class);
+    private static final Map<Boolean, List<String>> PIT_LIBS = getPitLibs();
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
                                         final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
@@ -40,17 +40,20 @@ class JavaParametersCreator {
         return javaParameters;
     }
 
-    private static List<String> getPitLibs() {
-        try (final var path = Files.walk(PIT4U_LIB_PATH)) {
+    private static Map<Boolean, List<String>> getPitLibs() {
+        try (final var path = Files.walk(PathManager.getPluginsDir()
+                .resolve("pit4u")
+                .resolve("lib"))) {
             return path.filter(e -> {
                         final var name = e.getFileName().toString();
-                        return name.startsWith("pitest-") || name.startsWith("commons-");
+                        return name.startsWith("pitest") || name.startsWith("commons") || name.startsWith("junit-platform");
                     })
                     .map(Path::toAbsolutePath)
                     .map(Path::toString)
-                    .toList();
+                    .collect(Collectors.partitioningBy(e -> e.startsWith("junit-platform")));
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Failure when walking PIT4U library path", e);
+            return Map.of();
         }
     }
 
@@ -62,13 +65,13 @@ class JavaParametersCreator {
     }
 
     private static void addPitLibraries(final JavaParameters javaParameters) {
-        PIT_LIBS.forEach(e -> javaParameters.getClassPath().addFirst(e));
+        PIT_LIBS.get(false).forEach(e -> javaParameters.getClassPath().add(e));
         final var jplRequired = javaParameters.getClassPath()
                 .getPathList()
                 .stream()
                 .noneMatch(e -> e.startsWith("junit-platform-launcher"));
         if (jplRequired) {
-            javaParameters.getClassPath().addFirst(JPL_PATH.toString());
+            PIT_LIBS.get(true).forEach(e -> javaParameters.getClassPath().add(e));
         }
     }
 
@@ -81,7 +84,7 @@ class JavaParametersCreator {
                         null
                 );
             } catch (final CantRunException e) {
-                throw new RuntimeException(e);
+                LOGGER.error("Failure when configuring module", e);
             }
         }
     }
