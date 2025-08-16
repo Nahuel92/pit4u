@@ -13,8 +13,8 @@ import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.process.OSProcessHandler;
-import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
@@ -77,7 +77,7 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                         .resolve("index.html")
                         .toAbsolutePath();
                 osProcessHandler.addProcessListener(
-                        new ProcessAdapter() {
+                        new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
                                 if (Files.exists(reportIndexPath)) {
