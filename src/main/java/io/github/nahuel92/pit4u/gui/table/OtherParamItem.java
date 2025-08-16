@@ -1,6 +1,7 @@
 package io.github.nahuel92.pit4u.gui.table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 public record OtherParamItem<V>(String name, V defaultValue, V value) {
     public OtherParamItem(String name, V defaultValue) {
@@ -23,6 +24,7 @@ public record OtherParamItem<V>(String name, V defaultValue, V value) {
     }
 
     @Override
+    @NotNull
     public String toString() {
         return name + StringUtils.SPACE + value;
     }

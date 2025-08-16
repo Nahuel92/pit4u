@@ -3,14 +3,14 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.7.2"
 }
 
 group = "io.github.nahuel92"
 
-val sinceVersion = "243"
-val untilVersion = "251.*"
-val pitVersion = "1.19.1"
+val sinceVersion = "251"
+val untilVersion = "252.*"
+val pitVersion = "1.20.1"
 
 repositories {
     mavenCentral()
@@ -25,7 +25,7 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.2.2"
+        version = "0.2.3"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set(sinceVersion)
@@ -45,13 +45,13 @@ intellijPlatform {
 }
 
 dependencies {
-    implementation("org.junit.platform:junit-platform-launcher:1.12.2")
+    implementation("org.junit.platform:junit-platform-launcher:1.13.4")
     implementation("org.pitest:pitest:$pitVersion")
-    implementation("org.pitest:pitest-junit5-plugin:1.2.2")
+    implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")
     implementation("org.pitest:pitest-entry:$pitVersion")
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.5")
+        intellijIdeaCommunity("2025.1")
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
