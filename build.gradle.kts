@@ -1,16 +1,18 @@
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.15.0"
+    id("org.jetbrains.changelog") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.16.0"
 }
 
 group = "io.github.nahuel92"
 
-val sinceVersion = "251"
-val untilVersion = "261.*"
-val pitVersion = "1.23.1"
+val sinceVersion = "261"
+val pluginVersion = providers.gradleProperty("pluginVersion").get()
+val pitVersion = "1.25.3"
 
 repositories {
     mavenCentral()
@@ -20,32 +22,44 @@ repositories {
     }
 }
 
+changelog {
+    version = pluginVersion
+    unreleasedTerm = "[Unreleased]"
+    outputFile = file("release-note.txt")
+    repositoryUrl = "https://github.com/Nahuel92/pit4u"
+}
+
 intellijPlatform {
     pluginConfiguration {
-        version = providers.gradleProperty("pluginVersion")
+        version = pluginVersion
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
-        version = "0.2.5"
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
             sinceBuild.set(sinceVersion)
-            untilBuild.set(untilVersion)
+            untilBuild.set(provider { null })
         }
+        changeNotes.set(provider {
+            changelog.renderItem(
+                changelog.getLatest(),
+                Changelog.OutputType.HTML
+            )
+        })
     }
     pluginVerification {
         ides {
             select {
                 channels = listOf(ProductRelease.Channel.RELEASE)
                 sinceBuild = sinceVersion
-                untilBuild = untilVersion
             }
+            recommended()
         }
     }
     buildSearchableOptions.set(false)
 }
 
 dependencies {
-    implementation("org.junit.platform:junit-platform-launcher:6.0.3")
+    implementation("org.junit.platform:junit-platform-launcher:6.1.0")
     implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")
@@ -65,13 +79,8 @@ dependencies {
 
 tasks {
     withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
-    }
-
-    patchPluginXml {
-        sinceBuild.set(sinceVersion)
-        untilBuild.set(untilVersion)
+        sourceCompatibility = "25"
+        targetCompatibility = "25"
     }
 
     signPlugin {
@@ -82,5 +91,17 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+
+    patchPluginXml {
+        changeNotes = provider {
+            changelog.renderItem(
+                changelog
+                    .getUnreleased()
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
+            )
+        }
     }
 }
