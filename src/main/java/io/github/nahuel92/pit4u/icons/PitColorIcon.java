@@ -9,7 +9,7 @@ import java.awt.RenderingHints;
 
 public final class PitColorIcon implements Icon {
     private final Color color;
-    private final int size = 12; // Standard IntelliJ gutter action icon size
+    private final int size = 12;
 
     public PitColorIcon(Color color) {
         this.color = color;
@@ -18,11 +18,9 @@ public final class PitColorIcon implements Icon {
     @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
         final var g2d = (Graphics2D) g.create();
-        // Enable anti-aliasing for sharp edges
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(color);
 
-        // Paint a solid rounded rectangle (gives it a modern, clean look)
         g2d.fillRoundRect(x, y, size, size, 4, 4);
 
         g2d.dispose();

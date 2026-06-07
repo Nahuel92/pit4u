@@ -109,6 +109,17 @@
                 text="Pit4UPopUpMenuAction" description="Mutate all classes in this package">
             <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
         </action>
+        <action id="io.github.nahuel92.pit4u.action.ClearPitHighlights"
+                class="io.github.nahuel92.pit4u.action.ClearPitHighlightsAction"
+                text="Clear PIT Highlights"
+                description="Removes all mutation coverage overlays from the editor">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="io.github.nahuel92.pit4u.action.ClearPitHighlights"
+                class="io.github.nahuel92.pit4u.action.ClearPitHighlightsAction"
+                text="Clear PIT Highlights">
+            <add-to-group group-id="EditorGutterPopupMenu" anchor="last"/>
+        </action>
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">

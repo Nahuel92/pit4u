@@ -91,30 +91,22 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                     return null;
                 }
 
-                // 1. Sniff out the version safely (this part requires a Read Action, which we are currently in)
                 String detectedVersion = ApplicationManager.getApplication().runReadAction(
                         (Computable<String>) () -> detectJUnitPlatformVersion(module)
                 );
                 if (detectedVersion == null) return null;
 
-                // 2. We must jump OUT of the read action to download.
-                // We can use a synchronous background task that IntelliJ handles natively without deadlocking.
-                final String[] result = new String[1];
-
                 try {
                     return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
-                            .get(5, TimeUnit.SECONDS); // Hard timeout safety barrier so the IDE never freezes
+                            .get(5, TimeUnit.SECONDS);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    // Fallback silently to your plugin's bundled jar if anything times out or fails
                     return JavaParametersCreator.JPL_PATH.toString();
                 }
             }
 
             private String detectJUnitPlatformVersion(Module module) {
-                // Regex to match "junit-platform-engine-1.x.x.jar" and capture the version
                 final var pattern = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
 
-                // Extract all class/library roots compiled into this specific module
                 final var files = OrderEnumerator.orderEntries(module)
                         .recursively()
                         .exportedOnly()
@@ -125,11 +117,9 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                     final var name = file.getName();
                     final var matcher = pattern.matcher(name);
                     if (matcher.find()) {
-                        // Found it! Return the captured version group (e.g., "1.10.2")
                         return matcher.group(1);
                     }
                 }
-                // Return null if the project isn't using JUnit 5 platform engines
                 return null;
             }
 
@@ -142,11 +132,9 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
                 var repos = RemoteRepositoriesConfiguration.getInstance(project).getRepositories();
 
-                // FIX: Using loadDependencies instead of loadDependenciesModal bypassing the UI layer entirely
                 JarRepositoryManager.loadDependenciesAsync(project, props, false, false, repos, null)
                         .onSuccess(resolvedRoots -> {
                             if (resolvedRoots != null && !resolvedRoots.isEmpty()) {
-                                // Return the local file system absolute path
                                 String cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
                                 future.complete(cleanPath);
                             } else {
@@ -202,10 +190,8 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                                 }
 
                                 ApplicationManager.getApplication().invokeLater(() -> {
-                                    // 1. Save data into the project scope
                                     PitMutationDataService.getInstance(getProject()).loadData(results.mutations());
 
-                                    // 2. Paint any editor currently open right now
                                     var fileEditorManager = FileEditorManager.getInstance(getProject());
                                     for (var editorWrapper : fileEditorManager.getAllEditors()) {
                                         if (editorWrapper instanceof TextEditor textEditor) {
