@@ -37,9 +37,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
-import io.github.nahuel92.pit4u.highlighter.PitUIPainter;
-import io.github.nahuel92.pit4u.runner.PitDataParser;
-import io.github.nahuel92.pit4u.runner.PitMutationDataService;
+import io.github.nahuel92.pit4u.highlighter.MutationDataService;
+import io.github.nahuel92.pit4u.highlighter.UIPainter;
+import io.github.nahuel92.pit4u.highlighter.XMLDataParser;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 
 public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
-    private static final Logger log = Logger.getInstance(PIT4URunConfiguration.class);
+    private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
@@ -178,16 +178,16 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                                     return;
                                 }
 
-                                final var results = PitDataParser.parse(path);
+                                final var results = XMLDataParser.parse(path);
 
                                 ApplicationManager.getApplication().invokeLater(() -> {
-                                    PitMutationDataService.getInstance(getProject()).loadData(results.mutations());
+                                    MutationDataService.getInstance(getProject()).loadData(results.mutations());
                                     final var fileEditorManager = FileEditorManager.getInstance(getProject());
                                     for (final var editorWrapper : fileEditorManager.getAllEditors()) {
                                         if (editorWrapper instanceof TextEditor textEditor) {
                                             var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
                                             if (psiFile != null) {
-                                                PitUIPainter.paintEditor(textEditor.getEditor(), psiFile);
+                                                UIPainter.paintEditor(textEditor.getEditor(), psiFile);
                                             }
                                         }
                                     }
@@ -236,7 +236,7 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
     @Override
     public void dispose() {
-        log.info("PIT4URunConfiguration Disposed");
+        LOG.info("PIT4URunConfiguration Disposed");
     }
 
     public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {

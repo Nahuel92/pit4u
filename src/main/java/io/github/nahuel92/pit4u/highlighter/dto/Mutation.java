@@ -1,4 +1,4 @@
-package io.github.nahuel92.pit4u.highlighter;
+package io.github.nahuel92.pit4u.highlighter.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

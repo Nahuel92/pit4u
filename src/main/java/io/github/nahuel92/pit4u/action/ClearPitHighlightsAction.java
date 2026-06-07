@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
-import io.github.nahuel92.pit4u.runner.PitMutationDataService;
+import io.github.nahuel92.pit4u.highlighter.MutationDataService;
 import org.jetbrains.annotations.NotNull;
 
 public final class ClearPitHighlightsAction extends AnAction {
@@ -15,7 +15,7 @@ public final class ClearPitHighlightsAction extends AnAction {
             return;
         }
 
-        PitMutationDataService.getInstance(project).clear();
+        MutationDataService.getInstance(project).clear();
 
         final var fileEditorManager = FileEditorManager.getInstance(project);
         for (var editorWrapper : fileEditorManager.getAllEditors()) {

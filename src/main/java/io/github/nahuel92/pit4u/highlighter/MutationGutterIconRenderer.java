@@ -6,11 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.Icon;
 import java.util.Objects;
 
-public final class PitMutationGutterIconRenderer extends GutterIconRenderer {
+final class MutationGutterIconRenderer extends GutterIconRenderer {
     private final String tooltipHtml;
     private final Icon icon;
 
-    public PitMutationGutterIconRenderer(final String tooltipHtml, final Icon icon) {
+    MutationGutterIconRenderer(@NotNull final String tooltipHtml,
+                               @NotNull final Icon icon) {
         this.tooltipHtml = tooltipHtml;
         this.icon = icon;
     }
@@ -36,7 +37,7 @@ public final class PitMutationGutterIconRenderer extends GutterIconRenderer {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PitMutationGutterIconRenderer that)) {
+        if (!(o instanceof MutationGutterIconRenderer that)) {
             return false;
         }
         return Objects.equals(tooltipHtml, that.tooltipHtml);

@@ -3,7 +3,7 @@ package io.github.nahuel92.pit4u.configuration;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.NotNullLazyValue;
-import io.github.nahuel92.pit4u.icons.PIT4UIcon;
+import io.github.nahuel92.pit4u.icon.PIT4UIcon;
 
 import java.util.Objects;
 

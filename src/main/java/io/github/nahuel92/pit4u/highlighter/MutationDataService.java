@@ -1,10 +1,11 @@
-package io.github.nahuel92.pit4u.runner;
+package io.github.nahuel92.pit4u.highlighter;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.LowMemoryWatcher;
-import io.github.nahuel92.pit4u.highlighter.Mutation;
+import io.github.nahuel92.pit4u.highlighter.dto.Mutation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,29 +14,31 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service(Service.Level.PROJECT)
-public final class PitMutationDataService {
-    private static final Logger log = Logger.getInstance(PitMutationDataService.class);
+public final class MutationDataService {
+    private static final Logger LOG = Logger.getInstance(MutationDataService.class);
     private final Map<String, List<Mutation>> mutationMap = new HashMap<>();
 
-    PitMutationDataService() {
+    MutationDataService() {
         LowMemoryWatcher.register(this::clear);
     }
 
-    public static PitMutationDataService getInstance(final Project project) {
-        return project.getService(PitMutationDataService.class);
+    public static MutationDataService getInstance(@NotNull final Project project) {
+        return project.getService(MutationDataService.class);
     }
 
-    public void loadData(final Collection<Mutation> mutations) {
+    public void loadData(@NotNull final Collection<Mutation> mutations) {
         mutationMap.clear();
         mutationMap.putAll(mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::mutatedClass)));
+        LOG.debug("Mutation data loaded");
     }
 
-    public List<Mutation> getMutationsForClass(final String fqName) {
+    public Collection<Mutation> getMutationsForClass(final String fqName) {
         return mutationMap.get(fqName);
     }
 
     public void clear() {
         mutationMap.clear();
+        LOG.debug("Cleared mutation data");
     }
 }

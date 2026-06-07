@@ -127,7 +127,7 @@
     </extensions>
 
     <applicationListeners>
-        <listener class="io.github.nahuel92.pit4u.highlighter.PitFileListener"
+        <listener class="io.github.nahuel92.pit4u.highlighter.FileListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 </idea-plugin>

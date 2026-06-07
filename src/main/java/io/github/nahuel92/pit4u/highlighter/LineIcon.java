@@ -1,4 +1,4 @@
-package io.github.nahuel92.pit4u.icons;
+package io.github.nahuel92.pit4u.highlighter;
 
 import javax.swing.Icon;
 import java.awt.Color;
@@ -7,11 +7,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-public final class PitColorIcon implements Icon {
+public final class LineIcon implements Icon {
     private final Color color;
     private final int size = 12;
 
-    public PitColorIcon(final Color color) {
+    public LineIcon(final Color color) {
         this.color = color;
     }
 

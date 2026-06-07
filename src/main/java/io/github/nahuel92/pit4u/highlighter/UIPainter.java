@@ -7,14 +7,13 @@ import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiClassOwner;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.JBColor;
-import io.github.nahuel92.pit4u.icons.PitColorIcon;
-import io.github.nahuel92.pit4u.runner.PitMutationDataService;
+import io.github.nahuel92.pit4u.highlighter.dto.Mutation;
 
 import javax.swing.Icon;
 import java.awt.Color;
 import java.util.stream.Collectors;
 
-public final class PitUIPainter {
+public final class UIPainter {
     private static final Key<String> PIT_TOOLTIP_KEY = Key.create("PIT_TOOLTIP");
     private static final TextAttributes KILLED_ATTRS = new TextAttributes(
             null,
@@ -53,7 +52,7 @@ public final class PitUIPainter {
         }
         editor.getMarkupModel().removeAllHighlighters();
         var project = psiFile.getProject();
-        var dataService = PitMutationDataService.getInstance(project);
+        var dataService = MutationDataService.getInstance(project);
         var classes = classOwner.getClasses();
         if (classes.length == 0) {
             return;
@@ -87,14 +86,14 @@ public final class PitUIPainter {
             boolean allKilled = lineMutations.stream().allMatch(m -> m.status() == Mutation.Status.KILLED);
 
             TextAttributes attributes = NO_COVERAGE_ATTRS;
-            Icon gutterIcon = new PitColorIcon(JBColor.GRAY);
+            Icon gutterIcon = new LineIcon(JBColor.GRAY);
 
             if (anySurvived) {
                 attributes = SURVIVED_ATTRS;
-                gutterIcon = new PitColorIcon(new JBColor(new Color(178, 34, 34), new Color(220, 20, 60))); // Red
+                gutterIcon = new LineIcon(new JBColor(new Color(178, 34, 34), new Color(220, 20, 60))); // Red
             } else if (allKilled) {
                 attributes = KILLED_ATTRS;
-                gutterIcon = new PitColorIcon(new JBColor(new Color(46, 139, 87), new Color(60, 179, 113))); // Green
+                gutterIcon = new LineIcon(new JBColor(new Color(46, 139, 87), new Color(60, 179, 113))); // Green
             }
 
             final var htmlBuilder = new StringBuilder();
@@ -125,7 +124,7 @@ public final class PitUIPainter {
                     attributes
             );
 
-            highlighter.setGutterIconRenderer(new PitMutationGutterIconRenderer(combinedHtmlTooltip, gutterIcon));
+            highlighter.setGutterIconRenderer(new MutationGutterIconRenderer(combinedHtmlTooltip, gutterIcon));
             highlighter.putUserData(PIT_TOOLTIP_KEY, combinedHtmlTooltip);
         }
     }
