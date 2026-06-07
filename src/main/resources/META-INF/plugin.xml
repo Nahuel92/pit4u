@@ -113,7 +113,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
-        <coverageRunner implementation="io.github.nahuel92.pit4u.runner.MyCoverageRunner" order="last"/>
-        <coverageEngine implementation="io.github.nahuel92.pit4u.runner.MyCoverageEngine" order="last"/>
     </extensions>
+
+    <applicationListeners>
+        <listener class="io.github.nahuel92.pit4u.highlighter.PitFileListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
 </idea-plugin>

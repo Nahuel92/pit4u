@@ -16,19 +16,20 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
-class JavaParametersCreator {
+final class JavaParametersCreator {
     private static final Path PIT4U_LIB_PATH = PathManager.getPluginsDir()
             .resolve("pit4u")
             .resolve("lib");
-    private static final Path JPL_PATH = PIT4U_LIB_PATH.resolve("junit-platform-launcher-1.9.2.jar");
+    public static final Path JPL_PATH = PIT4U_LIB_PATH.resolve("junit-platform-launcher-1.9.2.jar");
     private static final List<String> PIT_LIBS = getPitLibs();
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
-                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
+                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus,
+                                        final String alignedLauncherPath) {
         setModule(configurationModule, project);
         final var javaParameters = new JavaParameters();
-        addPitLibraries(javaParameters);
         configureModules(project, javaParameters);
+        addPitLibraries(javaParameters, alignedLauncherPath);
         javaParameters.setWorkingDirectory(configurationModule.getProject().getBasePath());
         javaParameters.setMainClass("org.pitest.mutationtest.commandline.MutationCoverageReport");
         javaParameters.getProgramParametersList().add("--targetClasses", pit4UEditorStatus.getTargetClasses());
@@ -61,14 +62,18 @@ class JavaParametersCreator {
         }
     }
 
-    private static void addPitLibraries(final JavaParameters javaParameters) {
+    private static void addPitLibraries(final JavaParameters javaParameters, final String alignedLauncherPath) {
         PIT_LIBS.forEach(e -> javaParameters.getClassPath().addFirst(e));
         final var jplRequired = javaParameters.getClassPath()
                 .getPathList()
                 .stream()
-                .noneMatch(e -> e.startsWith("junit-platform-launcher"));
-        if (jplRequired) {
-            javaParameters.getClassPath().addFirst(JPL_PATH.toString());
+                .anyMatch(e -> e.contains("junit-platform-launcher"));
+        if (!jplRequired && alignedLauncherPath != null) {
+            javaParameters.getClassPath().addTail(alignedLauncherPath);
+            return;
+        }
+        if (!jplRequired) {
+            javaParameters.getClassPath().addTail(JPL_PATH.toString());
         }
     }
 
