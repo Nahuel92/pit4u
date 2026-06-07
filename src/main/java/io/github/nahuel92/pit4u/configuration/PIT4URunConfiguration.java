@@ -1,7 +1,6 @@
 package io.github.nahuel92.pit4u.configuration;
 
 import com.intellij.execution.DefaultExecutionResult;
-import com.intellij.execution.ExecutionException;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
@@ -20,30 +19,43 @@ import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
+import com.intellij.jarRepository.JarRepositoryManager;
+import com.intellij.jarRepository.RemoteRepositoriesConfiguration;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.OrderEnumerator;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
-public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
+public final class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
-    private static final Logger LOGGER = Logger.getInstance(PIT4URunConfiguration.class);
+    private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
+    private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
 
-    protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
+    PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
     }
 
@@ -59,19 +71,24 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     }
 
     @Override
-    @Nullable
     public RunProfileState getState(@NotNull final Executor executor, @NotNull final ExecutionEnvironment environment) {
         final var javaCommandLineState = new JavaCommandLineState(environment) {
             private ConsoleView consoleView;
 
             @Override
             protected JavaParameters createJavaParameters() {
-                return JavaParametersCreator.create(getConfigurationModule(), getProject(), pit4UEditorStatus);
+                final var alignedPath = resolveLauncherPathSynchronously(getEnvironment());
+                return JavaParametersCreator.create(
+                        getConfigurationModule(),
+                        getProject(),
+                        pit4UEditorStatus,
+                        alignedPath
+                );
             }
 
             @Override
             @NotNull
-            protected OSProcessHandler startProcess() throws ExecutionException {
+            protected OSProcessHandler startProcess() throws com.intellij.execution.ExecutionException {
                 final var osProcessHandler = super.startProcess();
                 final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
                         .resolve("index.html")
@@ -100,7 +117,7 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
             @Override
             @NotNull
             public ExecutionResult execute(@NotNull final Executor executor,
-                                           @NotNull final ProgramRunner<?> runner) throws ExecutionException {
+                                           @NotNull final ProgramRunner<?> runner) throws com.intellij.execution.ExecutionException {
                 final var processHandler = startProcess();
                 final var console = createConsole(executor);
                 if (console != null) {
@@ -135,10 +152,79 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
 
     @Override
     public void dispose() {
-        LOGGER.info("PIT4URunConfiguration Disposed");
+        LOG.info("PIT4URunConfiguration Disposed");
+    }
+
+    public PIT4UEditorStatus getPit4UEditorStatus() {
+        return pit4UEditorStatus;
     }
 
     public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
         this.pit4UEditorStatus = pit4UEditorStatus;
+    }
+
+    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment) {
+        final var project = environment.getProject();
+        final var module = getConfigurationModule().getModule();
+        if (module == null) {
+            return StringUtils.EMPTY;
+        }
+
+        final var detectedVersion = ApplicationManager.getApplication()
+                .runReadAction((Computable<String>) () -> detectJUnitPlatformVersion(module));
+        if (detectedVersion == null) {
+            return StringUtils.EMPTY;
+        }
+
+        try {
+            return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
+                    .get(5, TimeUnit.SECONDS);
+        } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    private String detectJUnitPlatformVersion(final Module module) {
+        final var files = OrderEnumerator.orderEntries(module)
+                .recursively()
+                .exportedOnly()
+                .classes()
+                .getRoots();
+
+        for (final var file : files) {
+            final var name = file.getName();
+            final var matcher = DEPENDENCY_PATTERN.matcher(name);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        }
+        return null;
+    }
+
+    private CompletableFuture<String> getOrDownloadMatchingLauncherAsync(final Project project, final String version) {
+        final var future = new CompletableFuture<String>();
+        final var repositoryLibraryProperties = new RepositoryLibraryProperties(
+                "org.junit.platform", "junit-platform-launcher", version
+        );
+        final var repositories = RemoteRepositoriesConfiguration.getInstance(project).getRepositories();
+
+        JarRepositoryManager.loadDependenciesAsync(
+                        project,
+                        repositoryLibraryProperties,
+                        false,
+                        false,
+                        repositories,
+                        null
+                )
+                .onSuccess(resolvedRoots -> {
+                    if (resolvedRoots == null || resolvedRoots.isEmpty()) {
+                        future.complete(StringUtils.EMPTY);
+                        return;
+                    }
+                    final var cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
+                    future.complete(cleanPath);
+                })
+                .onError(error -> future.complete(StringUtils.EMPTY));
+        return future;
     }
 }

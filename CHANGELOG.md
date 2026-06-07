@@ -4,6 +4,12 @@
 
 ### Changed
 
+### Fixed
+
+## [0.2.6] - 2026-06-07
+
+### Changed
+
 - Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
 - Changelog reporting now uses Jetbrains' changelog plugin
 - Removed `untilBuild` version
@@ -11,7 +17,8 @@
 
 ### Fixed
 
-- There are no known issues at this moment. Hooray!
+- `Other Parameters` now persist changes correctly if input is manually changed
+- The plugin now automatically detects and aligns with the project's JUnit dependency version
 
 ## [0.2.5] - 2026-04-29
 

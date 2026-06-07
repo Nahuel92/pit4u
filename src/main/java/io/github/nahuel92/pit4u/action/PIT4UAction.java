@@ -28,7 +28,7 @@ import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
 import io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType;
 import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
-import io.github.nahuel92.pit4u.icons.PIT4UIcon;
+import io.github.nahuel92.pit4u.icon.PIT4UIcon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
@@ -36,7 +36,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class PIT4UAction extends AnAction {
+public final class PIT4UAction extends AnAction {
     private static final Logger LOGGER = Logger.getInstance(PIT4UAction.class);
 
     PIT4UAction() {

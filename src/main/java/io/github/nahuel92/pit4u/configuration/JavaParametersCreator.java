@@ -10,25 +10,27 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Set;
 
-class JavaParametersCreator {
+final class JavaParametersCreator {
     private static final Logger LOGGER = Logger.getInstance(JavaParametersCreator.class);
-    private static final Map<Boolean, List<String>> PIT_LIBS = getPitLibs();
+    private static final Collection<String> PIT_LIBS = getPitLibs();
 
-    public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
-                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
-        setModule(configurationModule, project);
+    public static JavaParameters create(@NotNull final JavaRunConfigurationModule configurationModule,
+                                        @NotNull final Project project,
+                                        @NotNull final PIT4UEditorStatus pit4UEditorStatus,
+                                        @NotNull final String alignedLauncherPath) {
         final var javaParameters = new JavaParameters();
-        addPitLibraries(javaParameters);
+        setModule(configurationModule, project);
         configureModules(project, javaParameters);
+        addPitLibraries(javaParameters, alignedLauncherPath);
         javaParameters.setWorkingDirectory(configurationModule.getProject().getBasePath());
         javaParameters.setMainClass("org.pitest.mutationtest.commandline.MutationCoverageReport");
         javaParameters.getProgramParametersList().add("--targetClasses", pit4UEditorStatus.getTargetClasses());
@@ -40,20 +42,20 @@ class JavaParametersCreator {
         return javaParameters;
     }
 
-    private static Map<Boolean, List<String>> getPitLibs() {
+    private static Collection<String> getPitLibs() {
         try (final var path = Files.walk(PathManager.getPluginsDir()
                 .resolve("pit4u")
                 .resolve("lib"))) {
             return path.filter(e -> {
                         final var name = e.getFileName().toString();
-                        return name.startsWith("pitest") || name.startsWith("commons") || name.startsWith("junit-platform");
+                        return name.startsWith("pitest") || name.startsWith("commons");
                     })
                     .map(Path::toAbsolutePath)
                     .map(Path::toString)
-                    .collect(Collectors.partitioningBy(e -> e.startsWith("junit-platform")));
+                    .toList();
         } catch (final IOException e) {
             LOGGER.error("Failure when walking PIT4U library path", e);
-            return Map.of();
+            return Set.of();
         }
     }
 
@@ -64,14 +66,14 @@ class JavaParametersCreator {
         }
     }
 
-    private static void addPitLibraries(final JavaParameters javaParameters) {
-        PIT_LIBS.get(false).forEach(e -> javaParameters.getClassPath().add(e));
+    private static void addPitLibraries(final JavaParameters javaParameters, final String alignedLauncherPath) {
+        PIT_LIBS.forEach(e -> javaParameters.getClassPath().add(e));
         final var jplRequired = javaParameters.getClassPath()
                 .getPathList()
                 .stream()
-                .noneMatch(e -> e.startsWith("junit-platform-launcher"));
-        if (jplRequired) {
-            PIT_LIBS.get(true).forEach(e -> javaParameters.getClassPath().add(e));
+                .noneMatch(e -> e.contains("junit-platform-launcher"));
+        if (jplRequired && alignedLauncherPath != null) {
+            javaParameters.getClassPath().addTail(alignedLauncherPath);
         }
     }
 

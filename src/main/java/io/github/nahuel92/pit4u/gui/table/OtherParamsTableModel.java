@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
+public final class OtherParamsTableModel extends ListTableModel<OtherParamItem<?>> {
     public OtherParamsTableModel(final String otherParams) {
         super(
                 new OtherParamsColumnInfo<>("Parameter", OtherParamItem::name),

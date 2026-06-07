@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-class PIT4UConfigurationStore {
+final class PIT4UConfigurationStore {
     private static final String TARGET_CLASSES = "targetClasses";
     private static final String TARGET_TESTS = "targetTests";
     private static final String SOURCE_DIRS = "sourceDirs";
@@ -20,11 +20,11 @@ class PIT4UConfigurationStore {
     }
 
     public static void writeExternal(final PIT4UEditorStatus pit4UEditorStatus, final Element element) {
-        element.setAttribute(TARGET_CLASSES, getOrDefault(pit4UEditorStatus.getTargetClasses()));
-        element.setAttribute(TARGET_TESTS, getOrDefault(pit4UEditorStatus.getTargetTests()));
-        element.setAttribute(SOURCE_DIRS, getOrDefault(pit4UEditorStatus.getSourceDir()));
-        element.setAttribute(REPORT_DIR, getOrDefault(pit4UEditorStatus.getReportDir()));
-        element.setAttribute(OTHER_PARAMS, getOrDefault(pit4UEditorStatus.getOtherParams()));
+        writeOrRemoveAttribute(element, TARGET_CLASSES, pit4UEditorStatus.getTargetClasses());
+        writeOrRemoveAttribute(element, TARGET_TESTS, pit4UEditorStatus.getTargetTests());
+        writeOrRemoveAttribute(element, SOURCE_DIRS, pit4UEditorStatus.getSourceDir());
+        writeOrRemoveAttribute(element, REPORT_DIR, pit4UEditorStatus.getReportDir());
+        writeOrRemoveAttribute(element, OTHER_PARAMS, pit4UEditorStatus.getOtherParams());
     }
 
     private static String getOrDefault(final Attribute attribute) {
@@ -34,7 +34,11 @@ class PIT4UConfigurationStore {
         return attribute.getValue();
     }
 
-    private static String getOrDefault(final String value) {
-        return StringUtils.defaultIfBlank(value, StringUtils.EMPTY);
+    private static void writeOrRemoveAttribute(final Element element, final String name, final String value) {
+        if (StringUtils.isEmpty(value)) {
+            element.removeAttribute(name);
+            return;
+        }
+        element.setAttribute(name, value);
     }
 }
