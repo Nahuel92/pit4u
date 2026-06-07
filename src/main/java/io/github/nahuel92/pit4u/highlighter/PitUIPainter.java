@@ -51,17 +51,14 @@ public final class PitUIPainter {
         if (!(psiFile instanceof PsiClassOwner classOwner)) {
             return;
         }
-
         editor.getMarkupModel().removeAllHighlighters();
-
         var project = psiFile.getProject();
         var dataService = PitMutationDataService.getInstance(project);
-
         var classes = classOwner.getClasses();
         if (classes.length == 0) {
             return;
         }
-        String fqName = classes[0].getQualifiedName();
+        final var fqName = classes[0].getQualifiedName();
         if (fqName == null) {
             return;
         }
@@ -80,7 +77,7 @@ public final class PitUIPainter {
             int rawLineNumber = entry.getKey();
             final var lineMutations = entry.getValue();
 
-            int targetLine = rawLineNumber - 1; // 0-indexed adjustment
+            int targetLine = rawLineNumber - 1;
             if (targetLine < 0 || targetLine >= totalLines) {
                 continue;
             }
@@ -100,17 +97,15 @@ public final class PitUIPainter {
                 gutterIcon = new PitColorIcon(new JBColor(new Color(46, 139, 87), new Color(60, 179, 113))); // Green
             }
 
-            StringBuilder htmlBuilder = new StringBuilder();
-            htmlBuilder.append("<html><body>");
+            final var htmlBuilder = new StringBuilder();
+            htmlBuilder.append("<html><body>")
+                    .append("<div style='max-height: 250px; width: 400px; overflow-y: auto; padding-right: 5px;'>")
+                    .append("<b>PIT Mutations on this line (").append(lineMutations.size()).append("):</b>")
+                    .append("<hr style='border: 0; border-top: 1px solid #555; margin: 5px 0;'/>")
+                    .append("<ul style='margin-left: 15px; padding-left: 0;'>");
 
-            htmlBuilder.append("<div style='max-height: 250px; width: 400px; overflow-y: auto; padding-right: 5px;'>");
-
-            htmlBuilder.append("<b>PIT Mutations on this line (").append(lineMutations.size()).append("):</b>");
-            htmlBuilder.append("<hr style='border: 0; border-top: 1px solid #555; margin: 5px 0;'/>");
-            htmlBuilder.append("<ul style='margin-left: 15px; padding-left: 0;'>");
-
-            for (Mutation m : lineMutations) {
-                String badgeColor = m.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
+            for (final var m : lineMutations) {
+                final var badgeColor = m.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
                 htmlBuilder.append("<li style='margin-bottom: 8px;'>")
                         .append("<span style='color: ").append(badgeColor).append("; font-weight: bold;'>[")
                         .append(m.status()).append("]</span> ")
@@ -119,12 +114,11 @@ public final class PitUIPainter {
                         .append("</li>");
             }
 
-            htmlBuilder.append("</ul>");
-            htmlBuilder.append("</div>"); // Close the scrolling div
-            htmlBuilder.append("</body></html>");
-
-            String combinedHtmlTooltip = htmlBuilder.toString();
-
+            htmlBuilder.append("</ul>")
+                    // Close the scrolling div
+                    .append("</div>")
+                    .append("</body></html>");
+            final var combinedHtmlTooltip = htmlBuilder.toString();
             final var highlighter = editor.getMarkupModel().addLineHighlighter(
                     targetLine,
                     HighlighterLayer.SELECTION - 1,

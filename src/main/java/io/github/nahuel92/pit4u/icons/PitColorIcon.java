@@ -11,18 +11,16 @@ public final class PitColorIcon implements Icon {
     private final Color color;
     private final int size = 12;
 
-    public PitColorIcon(Color color) {
+    public PitColorIcon(final Color color) {
         this.color = color;
     }
 
     @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
+    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
         final var g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(color);
-
         g2d.fillRoundRect(x, y, size, size, 4, 4);
-
         g2d.dispose();
     }
 

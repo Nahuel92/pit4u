@@ -16,22 +16,6 @@ public final class PitMutationGutterIconRenderer extends GutterIconRenderer {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PitMutationGutterIconRenderer that)) {
-            return false;
-        }
-        return Objects.equals(tooltipHtml, that.tooltipHtml);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(tooltipHtml);
-    }
-
-    @Override
     @NotNull
     public Icon getIcon() {
         return icon;
@@ -40,5 +24,21 @@ public final class PitMutationGutterIconRenderer extends GutterIconRenderer {
     @Override
     public String getTooltipText() {
         return tooltipHtml;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tooltipHtml);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PitMutationGutterIconRenderer that)) {
+            return false;
+        }
+        return Objects.equals(tooltipHtml, that.tooltipHtml);
     }
 }

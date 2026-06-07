@@ -13,7 +13,6 @@ public final class PitFileListener implements FileEditorManagerListener {
         final var project = source.getProject();
         final var psiFile = PsiManager.getInstance(project).findFile(file);
         final var fileEditor = source.getSelectedEditor(file);
-
         if (psiFile != null && fileEditor instanceof TextEditor textEditor) {
             PitUIPainter.paintEditor(textEditor.getEditor(), psiFile);
         }

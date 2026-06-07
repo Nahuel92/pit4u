@@ -1,6 +1,5 @@
 package io.github.nahuel92.pit4u.configuration;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.Executor;
@@ -38,16 +37,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
-import io.github.nahuel92.pit4u.highlighter.Mutations;
 import io.github.nahuel92.pit4u.highlighter.PitUIPainter;
+import io.github.nahuel92.pit4u.runner.PitDataParser;
 import io.github.nahuel92.pit4u.runner.PitMutationDataService;
-import org.apache.commons.lang3.exception.UncheckedException;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -181,19 +178,12 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                                     return;
                                 }
 
-                                final var xmlMapper = new XmlMapper();
-                                final Mutations results;
-                                try {
-                                    results = xmlMapper.readValue(path.toFile(), Mutations.class);
-                                } catch (final IOException e) {
-                                    throw new UncheckedException(e);
-                                }
+                                final var results = PitDataParser.parse(path);
 
                                 ApplicationManager.getApplication().invokeLater(() -> {
                                     PitMutationDataService.getInstance(getProject()).loadData(results.mutations());
-
-                                    var fileEditorManager = FileEditorManager.getInstance(getProject());
-                                    for (var editorWrapper : fileEditorManager.getAllEditors()) {
+                                    final var fileEditorManager = FileEditorManager.getInstance(getProject());
+                                    for (final var editorWrapper : fileEditorManager.getAllEditors()) {
                                         if (editorWrapper instanceof TextEditor textEditor) {
                                             var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
                                             if (psiFile != null) {

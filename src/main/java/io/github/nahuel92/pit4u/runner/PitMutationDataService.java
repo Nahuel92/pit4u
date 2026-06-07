@@ -3,6 +3,7 @@ package io.github.nahuel92.pit4u.runner;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.LowMemoryWatcher;
 import io.github.nahuel92.pit4u.highlighter.Mutation;
 
 import java.util.Collection;
@@ -15,6 +16,10 @@ import java.util.stream.Collectors;
 public final class PitMutationDataService {
     private static final Logger log = Logger.getInstance(PitMutationDataService.class);
     private final Map<String, List<Mutation>> mutationMap = new HashMap<>();
+
+    PitMutationDataService() {
+        LowMemoryWatcher.register(this::clear);
+    }
 
     public static PitMutationDataService getInstance(final Project project) {
         return project.getService(PitMutationDataService.class);
