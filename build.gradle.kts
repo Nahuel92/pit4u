@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("java")
-    id("org.jetbrains.changelog") version "2.6.0"
+    id("org.jetbrains.changelog") version "2.5.0"
     id("org.jetbrains.intellij.platform") version "2.16.0"
 }
 
