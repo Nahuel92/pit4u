@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.execution.util.JavaParametersUtil;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 final class JavaParametersCreator {
+    private static final Logger LOG = Logger.getInstance(JavaParametersCreator.class);
     private static final Path PIT4U_LIB_PATH = PathManager.getPluginsDir()
             .resolve("pit4u")
             .resolve("lib");
@@ -24,8 +26,7 @@ final class JavaParametersCreator {
     private static final List<String> PIT_LIBS = getPitLibs();
 
     public static JavaParameters create(final JavaRunConfigurationModule configurationModule,
-                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus,
-                                        final String alignedLauncherPath) {
+                                        final Project project, final PIT4UEditorStatus pit4UEditorStatus,final String alignedLauncherPath) {
         setModule(configurationModule, project);
         final var javaParameters = new JavaParameters();
         configureModules(project, javaParameters);
@@ -51,7 +52,7 @@ final class JavaParametersCreator {
                     .map(Path::toString)
                     .toList();
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            LOG.error("Failure when walking PIT4U library path", e);
         }
     }
 
@@ -86,7 +87,7 @@ final class JavaParametersCreator {
                         null
                 );
             } catch (final CantRunException e) {
-                throw new RuntimeException(e);
+                LOG.error("Failure when configuring module", e);
             }
         }
     }

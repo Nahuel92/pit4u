@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
-    private static final Logger log = Logger.getInstance(PIT4USettingsEditor.class);
+    private static final Logger LOGGER = Logger.getInstance(PIT4USettingsEditor.class);
     private final Project project;
     private final PIT4UEditorStatus pit4UEditorStatus;
     private JPanel jPanel;
@@ -96,7 +96,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
 
         Arrays.stream(otherParams.getListeners(ActionListener.class)).forEach(otherParams::removeActionListener);
 
-        log.info("PIT4USettingsEditor Disposed");
+        LOGGER.info("PIT4USettingsEditor Disposed");
     }
 
     private ActionListener getPackageChooserListener(final String title, final TextFieldWithBrowseButton field,
