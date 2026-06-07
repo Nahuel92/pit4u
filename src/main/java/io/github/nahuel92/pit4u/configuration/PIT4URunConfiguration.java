@@ -49,11 +49,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
-public final class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
+public final class PIT4URunConfiguration
+        extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
     private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
-    private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
+    private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
