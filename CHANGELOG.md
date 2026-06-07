@@ -4,8 +4,10 @@
 
 ### Changed
 
-- Changelog reporting now uses Jetbrains' changelog plugin
 - Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
+- Changelog reporting now uses Jetbrains' changelog plugin
+- Removed `untilBuild` version
+- Upgraded to Java 25
 
 ### Fixed
 
