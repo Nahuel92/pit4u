@@ -41,7 +41,7 @@ intellijPlatform {
         }
         changeNotes.set(provider {
             changelog.renderItem(
-                changelog.getLatest(), // Or use changelog.get(fullPluginVersion)
+                changelog.getLatest(),
                 Changelog.OutputType.HTML
             )
         })
