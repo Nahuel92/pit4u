@@ -28,7 +28,7 @@ import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
 import io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType;
 import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
 import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
-import io.github.nahuel92.pit4u.icons.PIT4UIcon;
+import io.github.nahuel92.pit4u.icon.PIT4UIcon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.MavenUtil;
 
@@ -36,8 +36,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class PIT4UAction extends AnAction {
-    private static final Logger LOGGER = Logger.getInstance(PIT4UAction.class);
+public final class PIT4UAction extends AnAction {
+    private static final Logger LOG = Logger.getInstance(PIT4UAction.class);
 
     PIT4UAction() {
         getTemplatePresentation().setIcon(PIT4UIcon.ICON);
@@ -141,7 +141,7 @@ public class PIT4UAction extends AnAction {
             status.setReportDir(path.resolve("build").toString());
             status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
         }
-        LOGGER.info("Module is not using Maven or Gradle as build system!");
+        LOG.info("Module is not using Maven or Gradle as build system!");
     }
 
     private static String getFullyQualifiedPackages(final AnActionEvent event, final Project project) {
@@ -168,7 +168,7 @@ public class PIT4UAction extends AnAction {
     private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
         final var executionBuilder = getExecEnvBuilder(runConfig);
         if (executionBuilder.isEmpty()) {
-            LOGGER.error("ExecutionBuilder is empty");
+            LOG.error("ExecutionBuilder is empty");
             return;
         }
         ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
@@ -181,7 +181,7 @@ public class PIT4UAction extends AnAction {
                     .build()
             );
         } catch (final ExecutionException ex) {
-            LOGGER.error("Failed to create execution environment", ex);
+            LOG.error("Failed to create execution environment", ex);
             return Optional.empty();
         }
     }
@@ -217,7 +217,7 @@ public class PIT4UAction extends AnAction {
         final var runManager = RunManager.getInstance(project);
         final var runConfig = getRunConfig(runManager);
         if (!(runConfig.getConfiguration() instanceof PIT4URunConfiguration config)) {
-            LOGGER.error("PIT4URunConfiguration wasn't found!");
+            LOG.error("PIT4URunConfiguration wasn't found!");
             return;
         }
         config.setPit4UEditorStatus(getPit4UEditorStatus(e, project, project.getBasePath()));

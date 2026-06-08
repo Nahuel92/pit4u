@@ -6,13 +6,17 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.TableView;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
-public class OtherParamsDialog extends DialogWrapper implements Disposable {
-    private static final Logger LOGGER = Logger.getInstance(OtherParamsDialog.class);
+public final class OtherParamsDialog extends DialogWrapper implements Disposable {
+    private static final Logger LOG = Logger.getInstance(OtherParamsDialog.class);
     private final OtherParamsTableModel otherParamsTableModel;
     private final TableView<OtherParamItem<?>> table;
     private final JButton defaultButton;
@@ -44,7 +48,7 @@ public class OtherParamsDialog extends DialogWrapper implements Disposable {
     public void dispose() {
         super.dispose();
         Arrays.stream(defaultButton.getListeners(ActionListener.class)).forEach(defaultButton::removeActionListener);
-        LOGGER.info("Other Parameters Dialog Disposed");
+        LOG.info("Other Parameters Dialog Disposed");
     }
 
     public String getUserFriendlyModel() {

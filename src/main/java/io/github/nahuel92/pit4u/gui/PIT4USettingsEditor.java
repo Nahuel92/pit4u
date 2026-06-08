@@ -2,7 +2,6 @@ package io.github.nahuel92.pit4u.gui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PackageChooserDialog;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.SettingsEditor;
@@ -17,15 +16,16 @@ import io.github.nahuel92.pit4u.configuration.PIT4URunConfiguration;
 import io.github.nahuel92.pit4u.gui.table.OtherParamsDialog;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
-    private static final Logger LOGGER = Logger.getInstance(PIT4USettingsEditor.class);
+public final class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
+    private static final Logger LOG = Logger.getInstance(PIT4USettingsEditor.class);
     private final Project project;
     private final PIT4UEditorStatus pit4UEditorStatus;
     private JPanel jPanel;
@@ -38,11 +38,6 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     public PIT4USettingsEditor(final Project project, final PIT4UEditorStatus pit4UEditorStatus) {
         this.project = project;
         this.pit4UEditorStatus = pit4UEditorStatus;
-        this.targetClasses.setText(pit4UEditorStatus.getTargetClasses());
-        this.targetTests.setText(pit4UEditorStatus.getTargetTests());
-        this.sourceDir.setText(pit4UEditorStatus.getSourceDir());
-        this.reportDir.setText(pit4UEditorStatus.getReportDir());
-        this.otherParams.setText(pit4UEditorStatus.getOtherParams());
     }
 
     @Override
@@ -75,10 +70,34 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
 
     @Override
     protected void resetEditorFrom(@NotNull final PIT4URunConfiguration s) {
+        final var configStatus = s.getPit4UEditorStatus();
+        pit4UEditorStatus.setTargetClasses(configStatus.getTargetClasses());
+        pit4UEditorStatus.setTargetTests(configStatus.getTargetTests());
+        pit4UEditorStatus.setSourceDir(configStatus.getSourceDir());
+        pit4UEditorStatus.setReportDir(configStatus.getReportDir());
+        pit4UEditorStatus.setOtherParams(configStatus.getOtherParams());
+
+        targetClasses.setText(pit4UEditorStatus.getTargetClasses());
+        targetTests.setText(pit4UEditorStatus.getTargetTests());
+        sourceDir.setText(pit4UEditorStatus.getSourceDir());
+        reportDir.setText(pit4UEditorStatus.getReportDir());
+
+        otherParams.setText(pit4UEditorStatus.getOtherParams());
     }
 
     @Override
     protected void applyEditorTo(@NotNull final PIT4URunConfiguration s) {
+        final var configStatus = s.getPit4UEditorStatus();
+        if (configStatus == null) {
+            return;
+        }
+        configStatus.setTargetClasses(targetClasses.getText());
+        configStatus.setTargetTests(targetTests.getText());
+        configStatus.setSourceDir(sourceDir.getText());
+        configStatus.setReportDir(reportDir.getText());
+
+        pit4UEditorStatus.setOtherParams(otherParams.getText());
+        configStatus.setOtherParams(otherParams.getText());
     }
 
     @Override
@@ -96,7 +115,7 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
 
         Arrays.stream(otherParams.getListeners(ActionListener.class)).forEach(otherParams::removeActionListener);
 
-        LOGGER.info("PIT4USettingsEditor Disposed");
+        LOG.info("PIT4USettingsEditor Disposed");
     }
 
     private ActionListener getPackageChooserListener(final String title, final TextFieldWithBrowseButton field,
@@ -145,15 +164,13 @@ public class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfiguration> {
     }
 
     private ActionListener getOtherParamsDialogListener() {
-        return e -> ApplicationManager.getApplication().invokeLater(
-                () -> {
-                    final var otherParamsDialog = new OtherParamsDialog(pit4UEditorStatus.getOtherParams());
-                    Disposer.register(this, otherParamsDialog);
-                    if (otherParamsDialog.showAndGet()) {
-                        otherParams.setText(otherParamsDialog.getUserFriendlyModel());
-                        pit4UEditorStatus.setOtherParams(otherParamsDialog.getModelToSave());
-                    }
-                }
-        );
+        return e -> {
+            final var otherParamsDialog = new OtherParamsDialog(pit4UEditorStatus.getOtherParams());
+            Disposer.register(this, otherParamsDialog);
+            if (otherParamsDialog.showAndGet()) {
+                otherParams.setText(otherParamsDialog.getUserFriendlyModel());
+                pit4UEditorStatus.setOtherParams(otherParamsDialog.getModelToSave());
+            }
+        };
     }
 }

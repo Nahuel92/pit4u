@@ -59,7 +59,6 @@ intellijPlatform {
 }
 
 dependencies {
-    implementation("org.junit.platform:junit-platform-launcher:6.1.0")
     implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")

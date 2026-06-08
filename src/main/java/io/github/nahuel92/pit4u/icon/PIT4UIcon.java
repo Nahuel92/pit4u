@@ -1,8 +1,8 @@
-package io.github.nahuel92.pit4u.icons;
+package io.github.nahuel92.pit4u.icon;
 
 import com.intellij.openapi.util.IconLoader;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
 public interface PIT4UIcon {
     Icon ICON = IconLoader.findIcon(
