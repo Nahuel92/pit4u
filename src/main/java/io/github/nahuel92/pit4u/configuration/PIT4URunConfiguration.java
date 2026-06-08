@@ -95,27 +95,19 @@ public final class PIT4URunConfiguration
             @Override
             @NotNull
             protected OSProcessHandler startProcess() throws com.intellij.execution.ExecutionException {
+                MutationDataService.getInstance(getProject()).clear();
                 final var osProcessHandler = super.startProcess();
-                final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
-                        .resolve("index.html")
-                        .toAbsolutePath();
                 osProcessHandler.addProcessListener(
                         new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-
-                                if (!Files.exists(reportIndexPath)) {
-                                    consoleView.print(
-                                            "Pitest execution failed. Please check the output above for more information",
-                                            ConsoleViewContentType.ERROR_OUTPUT
-                                    );
-                                    return;
-                                }
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
                                         .resolve("mutations.xml")
                                         .toAbsolutePath();
-
                                 if (!Files.exists(path)) {
+                                    final var error = "Could not find mutations.xml at %s.".formatted(path);
+                                    consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
+                                    LOG.error(error);
                                     return;
                                 }
 

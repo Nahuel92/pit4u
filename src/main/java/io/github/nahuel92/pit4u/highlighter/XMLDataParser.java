@@ -11,7 +11,6 @@ import java.nio.file.Path;
 
 public final class XMLDataParser {
     private static final Logger LOG = Logger.getInstance(XMLDataParser.class);
-
     private static final XmlMapper XML_MAPPER = new XmlMapper();
 
     public static Mutations parse(@NotNull final Path path) {
