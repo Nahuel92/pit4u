@@ -37,6 +37,10 @@ public final class MutationDataService {
         return mutationMap.get(fqName);
     }
 
+    public boolean hasActiveMutations() {
+        return !mutationMap.isEmpty();
+    }
+
     public void clear() {
         mutationMap.clear();
         LOG.debug("Cleared mutation data");
