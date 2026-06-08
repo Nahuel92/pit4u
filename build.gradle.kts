@@ -59,6 +59,7 @@ intellijPlatform {
 }
 
 dependencies {
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2")
     implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")

@@ -4,7 +4,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.TableView;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -38,7 +37,6 @@ public final class OtherParamsDialog extends DialogWrapper implements Disposable
     }
 
     @Override
-    @Nullable
     protected JComponent createCenterPanel() {
         defaultButton.addActionListener(e -> otherParamsTableModel.restoreDefaultValues());
         return getCenterPanel();
