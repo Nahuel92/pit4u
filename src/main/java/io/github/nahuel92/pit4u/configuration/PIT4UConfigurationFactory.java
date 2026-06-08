@@ -6,9 +6,9 @@ import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
-class PIT4UConfigurationFactory extends ConfigurationFactory {
+final class PIT4UConfigurationFactory extends ConfigurationFactory {
     public PIT4UConfigurationFactory(@NotNull final ConfigurationType type) {
         super(type);
     }

@@ -2,7 +2,7 @@ package io.github.nahuel92.pit4u.configuration;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class PIT4UEditorStatus {
+public final class PIT4UEditorStatus {
     private String targetClasses = StringUtils.EMPTY;
     private String targetTests = StringUtils.EMPTY;
     private String sourceDir = StringUtils.EMPTY;

@@ -7,10 +7,10 @@ import io.github.nahuel92.pit4u.icon.PIT4UIcon;
 
 import java.util.Objects;
 
-public class PIT4UConfigurationType extends ConfigurationTypeBase {
+public final class PIT4UConfigurationType extends ConfigurationTypeBase {
     private static final String ID = "Pit4UConfigurationType";
 
-    protected PIT4UConfigurationType() {
+    PIT4UConfigurationType() {
         super(
                 ID,
                 "PIT4U",

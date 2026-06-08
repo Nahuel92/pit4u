@@ -6,11 +6,12 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsContexts;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.KeyStroke;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-public class OtherParamsButton extends TextFieldWithBrowseButton {
+public final class OtherParamsButton extends TextFieldWithBrowseButton {
     @Override
     @NotNull
     protected Icon getDefaultIcon() {

@@ -2,11 +2,14 @@ package io.github.nahuel92.pit4u.gui.table;
 
 import com.intellij.openapi.ui.ComboBox;
 
-import javax.swing.*;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JCheckBox;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import java.awt.*;
+import java.awt.Component;
 
-class OtherParamCellEditor extends AbstractCellEditor implements TableCellEditor {
+final class OtherParamCellEditor extends AbstractCellEditor implements TableCellEditor {
     private static final String[] OUTPUT_FORMATS = {
             "HTML",
             "XML",

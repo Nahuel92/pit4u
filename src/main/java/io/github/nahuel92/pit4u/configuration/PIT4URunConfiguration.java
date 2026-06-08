@@ -18,13 +18,12 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
+import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
 import com.intellij.jarRepository.JarRepositoryManager;
 import com.intellij.jarRepository.RemoteRepositoriesConfiguration;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
@@ -33,16 +32,11 @@ import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
-import io.github.nahuel92.pit4u.highlighter.MutationDataService;
-import io.github.nahuel92.pit4u.highlighter.UIPainter;
-import io.github.nahuel92.pit4u.highlighter.XMLDataParser;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
 
 import java.nio.file.Files;
@@ -55,12 +49,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
-public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
+public final class PIT4URunConfiguration
+        extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
     private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
+    private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
-    protected PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
+    PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
         super(name, new JavaRunConfigurationModule(project, true), factory);
     }
 
@@ -76,79 +72,19 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
     }
 
     @Override
-    @Nullable
     public RunProfileState getState(@NotNull final Executor executor, @NotNull final ExecutionEnvironment environment) {
         final var javaCommandLineState = new JavaCommandLineState(environment) {
             private ConsoleView consoleView;
 
-            private String resolveLauncherPathSynchronously() {
-                final var project = getEnvironment().getProject();
-                final var module = getConfigurationModule().getModule();
-                if (module == null) {
-                    return null;
-                }
-
-                String detectedVersion = ApplicationManager.getApplication().runReadAction(
-                        (Computable<String>) () -> detectJUnitPlatformVersion(module)
-                );
-                if (detectedVersion == null) return null;
-
-                try {
-                    return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
-                            .get(5, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    return JavaParametersCreator.JPL_PATH.toString();
-                }
-            }
-
-            private String detectJUnitPlatformVersion(Module module) {
-                final var pattern = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
-
-                final var files = OrderEnumerator.orderEntries(module)
-                        .recursively()
-                        .exportedOnly()
-                        .classes()
-                        .getRoots();
-
-                for (VirtualFile file : files) {
-                    final var name = file.getName();
-                    final var matcher = pattern.matcher(name);
-                    if (matcher.find()) {
-                        return matcher.group(1);
-                    }
-                }
-                return null;
-            }
-
-            private CompletableFuture<String> getOrDownloadMatchingLauncherAsync(Project project, String version) {
-                CompletableFuture<String> future = new CompletableFuture<>();
-
-                final var props = new RepositoryLibraryProperties(
-                        "org.junit.platform", "junit-platform-launcher", version
-                );
-
-                var repos = RemoteRepositoriesConfiguration.getInstance(project).getRepositories();
-
-                JarRepositoryManager.loadDependenciesAsync(project, props, false, false, repos, null)
-                        .onSuccess(resolvedRoots -> {
-                            if (resolvedRoots != null && !resolvedRoots.isEmpty()) {
-                                String cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
-                                future.complete(cleanPath);
-                            } else {
-                                future.complete(JavaParametersCreator.JPL_PATH.toString());
-                            }
-                        })
-                        .onError(error -> {
-                            future.complete(JavaParametersCreator.JPL_PATH.toString());
-                        });
-
-                return future;
-            }
-
             @Override
             protected JavaParameters createJavaParameters() {
-                String alignedPath = resolveLauncherPathSynchronously();
-                return JavaParametersCreator.create(getConfigurationModule(), getProject(), pit4UEditorStatus, alignedPath);
+                final var alignedPath = resolveLauncherPathSynchronously(getEnvironment());
+                return JavaParametersCreator.create(
+                        getConfigurationModule(),
+                        getProject(),
+                        pit4UEditorStatus,
+                        alignedPath
+                );
             }
 
             @Override
@@ -158,40 +94,21 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
                 final var reportIndexPath = Path.of(pit4UEditorStatus.getReportDir())
                         .resolve("index.html")
                         .toAbsolutePath();
-
                 osProcessHandler.addProcessListener(
                         new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                if (!Files.exists(reportIndexPath)) {
-                                    consoleView.print(
-                                            "Pitest execution failed. Please check the output above for more information",
-                                            ConsoleViewContentType.ERROR_OUTPUT
+                                if (Files.exists(reportIndexPath)) {
+                                    consoleView.printHyperlink(
+                                            "Report ready, click to open it on your browser",
+                                            new OpenUrlHyperlinkInfo("file:///" + reportIndexPath)
                                     );
                                     return;
                                 }
-                                final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve("mutations.xml")
-                                        .toAbsolutePath();
-
-                                if (!Files.exists(path)) {
-                                    return;
-                                }
-
-                                final var results = XMLDataParser.parse(path);
-
-                                ApplicationManager.getApplication().invokeLater(() -> {
-                                    MutationDataService.getInstance(getProject()).loadData(results.mutations());
-                                    final var fileEditorManager = FileEditorManager.getInstance(getProject());
-                                    for (final var editorWrapper : fileEditorManager.getAllEditors()) {
-                                        if (editorWrapper instanceof TextEditor textEditor) {
-                                            var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
-                                            if (psiFile != null) {
-                                                UIPainter.paintEditor(textEditor.getEditor(), psiFile);
-                                            }
-                                        }
-                                    }
-                                });
+                                consoleView.print(
+                                        "Pitest execution failed. Please check the output above for more information",
+                                        ConsoleViewContentType.ERROR_OUTPUT
+                                );
                             }
                         }
                 );
@@ -239,7 +156,76 @@ public class PIT4URunConfiguration extends ModuleBasedConfiguration<JavaRunConfi
         LOG.info("PIT4URunConfiguration Disposed");
     }
 
+    public PIT4UEditorStatus getPit4UEditorStatus() {
+        return pit4UEditorStatus;
+    }
+
     public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
         this.pit4UEditorStatus = pit4UEditorStatus;
+    }
+
+    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment) {
+        final var project = environment.getProject();
+        final var module = getConfigurationModule().getModule();
+        if (module == null) {
+            return StringUtils.EMPTY;
+        }
+
+        final var detectedVersion = ApplicationManager.getApplication()
+                .runReadAction((Computable<String>) () -> detectJUnitPlatformVersion(module));
+        if (detectedVersion == null) {
+            return StringUtils.EMPTY;
+        }
+
+        try {
+            return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
+                    .get(5, TimeUnit.SECONDS);
+        } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    private String detectJUnitPlatformVersion(final Module module) {
+        final var files = OrderEnumerator.orderEntries(module)
+                .recursively()
+                .exportedOnly()
+                .classes()
+                .getRoots();
+
+        for (final var file : files) {
+            final var name = file.getName();
+            final var matcher = DEPENDENCY_PATTERN.matcher(name);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        }
+        return null;
+    }
+
+    private CompletableFuture<String> getOrDownloadMatchingLauncherAsync(final Project project, final String version) {
+        final var future = new CompletableFuture<String>();
+        final var repositoryLibraryProperties = new RepositoryLibraryProperties(
+                "org.junit.platform", "junit-platform-launcher", version
+        );
+        final var repositories = RemoteRepositoriesConfiguration.getInstance(project).getRepositories();
+
+        JarRepositoryManager.loadDependenciesAsync(
+                        project,
+                        repositoryLibraryProperties,
+                        false,
+                        false,
+                        repositories,
+                        null
+                )
+                .onSuccess(resolvedRoots -> {
+                    if (resolvedRoots == null || resolvedRoots.isEmpty()) {
+                        future.complete(StringUtils.EMPTY);
+                        return;
+                    }
+                    final var cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
+                    future.complete(cleanPath);
+                })
+                .onError(error -> future.complete(StringUtils.EMPTY));
+        return future;
     }
 }
