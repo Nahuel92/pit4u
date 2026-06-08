@@ -8,6 +8,10 @@
 
 ## [0.2.6] - 2026-06-07
 
+### Added
+
+- Code highlighting
+
 ### Changed
 
 - Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
