@@ -18,7 +18,7 @@ expect to add new features that, at the time of writing, don't exist in the afor
 
 To accelerate development, this project occasionally utilizes generative AI tools for brainstorming,
 boilerplate generation, and debugging assistance. However, all AI-assisted code is strictly
-reviewed, manually tested, and owned by the project maintainers.
+reviewed, manually tested, and owned by me (project maintainer).
 
 > [!IMPORTANT]
 > I **DO NOT** accept unverified, raw AI-generated contributions.
