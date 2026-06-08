@@ -18,12 +18,13 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.runners.ProgramRunner;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.ide.browsers.OpenUrlHyperlinkInfo;
 import com.intellij.jarRepository.JarRepositoryManager;
 import com.intellij.jarRepository.RemoteRepositoriesConfiguration;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
@@ -32,8 +33,12 @@ import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
+import io.github.nahuel92.pit4u.highlighter.MutationDataService;
+import io.github.nahuel92.pit4u.highlighter.UIPainter;
+import io.github.nahuel92.pit4u.highlighter.XMLDataParser;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
@@ -98,16 +103,35 @@ public final class PIT4URunConfiguration
                         new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                if (Files.exists(reportIndexPath)) {
-                                    consoleView.printHyperlink(
-                                            "Report ready, click to open it on your browser",
-                                            new OpenUrlHyperlinkInfo("file:///" + reportIndexPath)
+
+                                if (!Files.exists(reportIndexPath)) {
+                                    consoleView.print(
+                                            "Pitest execution failed. Please check the output above for more information",
+                                            ConsoleViewContentType.ERROR_OUTPUT
                                     );
                                     return;
                                 }
-                                consoleView.print(
-                                        "Pitest execution failed. Please check the output above for more information",
-                                        ConsoleViewContentType.ERROR_OUTPUT
+                                final var path = Path.of(pit4UEditorStatus.getReportDir())
+                                        .resolve("mutations.xml")
+                                        .toAbsolutePath();
+
+                                if (!Files.exists(path)) {
+                                    return;
+                                }
+
+                                final var results = XMLDataParser.parse(path);
+                                ApplicationManager.getApplication().invokeLater(() -> {
+                                            MutationDataService.getInstance(getProject()).loadData(results.mutations());
+                                            final var fileEditorManager = FileEditorManager.getInstance(getProject());
+                                            for (final var editorWrapper : fileEditorManager.getAllEditors()) {
+                                                if (editorWrapper instanceof TextEditor textEditor) {
+                                                    var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
+                                                    if (psiFile != null) {
+                                                        UIPainter.paintEditor(textEditor.getEditor(), psiFile);
+                                                    }
+                                                }
+                                            }
+                                        }
                                 );
                             }
                         }

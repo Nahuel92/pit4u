@@ -11,12 +11,9 @@ import java.awt.Component;
 
 final class OtherParamCellEditor extends AbstractCellEditor implements TableCellEditor {
     private static final String[] OUTPUT_FORMATS = {
-            "HTML",
             "XML",
-            "CSV",
             "XML,CSV",
             "HTML,XML",
-            "HTML,CSV",
             "HTML,XML,CSV"
     };
     private final ComboBox<String> comboBox;

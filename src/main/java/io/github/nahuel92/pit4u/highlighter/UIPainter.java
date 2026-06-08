@@ -15,45 +15,39 @@ import java.util.stream.Collectors;
 
 public final class UIPainter {
     private static final Key<String> PIT_TOOLTIP_KEY = Key.create("PIT_TOOLTIP");
-    private static final TextAttributes KILLED_ATTRS = new TextAttributes(
-            null,
-            new JBColor(
-                    new Color(215, 245, 215),
-                    new Color(43, 68, 43)
-            ),
-            null,
-            null,
-            0
+    private static final TextAttributes KILLED_ATTRS = createTextAttributes(
+            new Color(215, 245, 215),
+            new Color(43, 68, 43)
     );
-    private static final TextAttributes SURVIVED_ATTRS = new TextAttributes(
-            null,
-            new JBColor(
-                    new Color(255, 215, 215),
-                    new Color(75, 43, 43)
-            ),
-            null,
-            null,
-            0
+
+    private static final TextAttributes SURVIVED_ATTRS = createTextAttributes(
+            new Color(255, 215, 215),
+            new Color(75, 43, 43)
     );
-    private static final TextAttributes NO_COVERAGE_ATTRS = new TextAttributes(
-            null,
-            new JBColor(
-                    new Color(242, 242, 242),
-                    new Color(53, 53, 53)
-            ),
-            null,
-            null,
-            0
+
+    private static final TextAttributes NO_COVERAGE_ATTRS = createTextAttributes(
+            new Color(242, 242, 242),
+            new Color(53, 53, 53)
     );
+
+    private static TextAttributes createTextAttributes(final Color regular, final Color dark) {
+        return new TextAttributes(
+                null,
+                new JBColor(regular, dark),
+                null,
+                null,
+                0
+        );
+    }
 
     public static void paintEditor(final Editor editor, final PsiFile psiFile) {
         if (!(psiFile instanceof PsiClassOwner classOwner)) {
             return;
         }
         editor.getMarkupModel().removeAllHighlighters();
-        var project = psiFile.getProject();
-        var dataService = MutationDataService.getInstance(project);
-        var classes = classOwner.getClasses();
+        final var project = psiFile.getProject();
+        final var dataService = MutationDataService.getInstance(project);
+        final var classes = classOwner.getClasses();
         if (classes.length == 0) {
             return;
         }
@@ -67,33 +61,31 @@ public final class UIPainter {
             return;
         }
 
-        int totalLines = editor.getDocument().getLineCount();
+        final var totalLines = editor.getDocument().getLineCount();
 
         final var mutationsByLine = mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::lineNumber));
 
         for (final var entry : mutationsByLine.entrySet()) {
             int rawLineNumber = entry.getKey();
-            final var lineMutations = entry.getValue();
-
-            int targetLine = rawLineNumber - 1;
+            final var targetLine = rawLineNumber - 1;
             if (targetLine < 0 || targetLine >= totalLines) {
                 continue;
             }
 
-            // Rule: If even one mutation survived (not detected), the line counts as SURVIVED (Red).
-            boolean anySurvived = lineMutations.stream().anyMatch(m -> !m.detected());
-            boolean allKilled = lineMutations.stream().allMatch(m -> m.status() == Mutation.Status.KILLED);
+            final var lineMutations = entry.getValue();
+            final var anySurvived = lineMutations.stream().anyMatch(m -> !m.detected());
+            final var allKilled = lineMutations.stream().allMatch(m -> m.status() == Mutation.Status.KILLED);
 
             TextAttributes attributes = NO_COVERAGE_ATTRS;
             Icon gutterIcon = new LineIcon(JBColor.GRAY);
 
             if (anySurvived) {
                 attributes = SURVIVED_ATTRS;
-                gutterIcon = new LineIcon(new JBColor(new Color(178, 34, 34), new Color(220, 20, 60))); // Red
+                gutterIcon = new LineIcon(new JBColor(new Color(178, 34, 34), new Color(220, 20, 60)));
             } else if (allKilled) {
                 attributes = KILLED_ATTRS;
-                gutterIcon = new LineIcon(new JBColor(new Color(46, 139, 87), new Color(60, 179, 113))); // Green
+                gutterIcon = new LineIcon(new JBColor(new Color(46, 139, 87), new Color(60, 179, 113)));
             }
 
             final var htmlBuilder = new StringBuilder();
@@ -103,18 +95,17 @@ public final class UIPainter {
                     .append("<hr style='border: 0; border-top: 1px solid #555; margin: 5px 0;'/>")
                     .append("<ul style='margin-left: 15px; padding-left: 0;'>");
 
-            for (final var m : lineMutations) {
-                final var badgeColor = m.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
+            for (final var mutation : lineMutations) {
+                final var badgeColor = mutation.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
                 htmlBuilder.append("<li style='margin-bottom: 8px;'>")
                         .append("<span style='color: ").append(badgeColor).append("; font-weight: bold;'>[")
-                        .append(m.status()).append("]</span> ")
-                        .append("<b>Method:</b> ").append(m.mutatedMethod()).append("<br/>")
-                        .append("<b>Detail:</b> ").append(m.description() != null ? m.description() : "None")
+                        .append(mutation.status()).append("]</span> ")
+                        .append("<b>Method:</b> ").append(mutation.mutatedMethod()).append("<br/>")
+                        .append("<b>Detail:</b> ").append(mutation.description() != null ? mutation.description() : "None")
                         .append("</li>");
             }
 
             htmlBuilder.append("</ul>")
-                    // Close the scrolling div
                     .append("</div>")
                     .append("</body></html>");
             final var combinedHtmlTooltip = htmlBuilder.toString();

@@ -47,7 +47,7 @@ public final class OtherParamsTableModel extends ListTableModel<OtherParamItem<?
                 new OtherParamItem<>("--timestampedReports", false),
                 new OtherParamItem<>("--verbose", false),
 
-                new OtherParamItem<>("--outputFormats", "HTML"),
+                new OtherParamItem<>("--outputFormats", "XML"),
 
                 new OtherParamItem<>("--timeoutFactor", "1.25"),
                 new OtherParamItem<>("--timeoutConst", "4000"),
