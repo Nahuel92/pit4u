@@ -241,7 +241,7 @@ public final class PIT4URunConfiguration
                     final var cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
                     future.complete(cleanPath);
                 })
-                .onError(error -> future.complete(StringUtils.EMPTY));
+                .onError(_ -> future.complete(StringUtils.EMPTY));
         return future;
     }
 }

@@ -24,27 +24,29 @@ repositories {
 
 changelog {
     version = pluginVersion
-    unreleasedTerm = "[Unreleased]"
-    outputFile = file("release-note.txt")
     repositoryUrl = "https://github.com/Nahuel92/pit4u"
 }
 
 intellijPlatform {
     pluginConfiguration {
-        version = pluginVersion
         id = "io.github.nahuel92.pit4u"
         name = "PIT4U"
+        version = pluginVersion
         description = "Plugin that allows you to run PIT mutation tests directly from your IDE"
         ideaVersion {
-            sinceBuild.set(sinceVersion)
-            untilBuild.set(provider { null })
+            sinceBuild = sinceVersion
         }
-        changeNotes.set(provider {
-            changelog.renderItem(
-                changelog.getLatest(),
-                Changelog.OutputType.HTML
-            )
-        })
+        val changelog = project.changelog
+        changeNotes = provider {
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML
+                )
+            }
+        }
     }
     pluginVerification {
         ides {
@@ -55,7 +57,7 @@ intellijPlatform {
             recommended()
         }
     }
-    buildSearchableOptions.set(false)
+    buildSearchableOptions = false
 }
 
 dependencies {
@@ -77,31 +79,8 @@ dependencies {
     }
 }
 
-tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "25"
-        targetCompatibility = "25"
-    }
-
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-    }
-
-    publishPlugin {
-        token.set(System.getenv("PUBLISH_TOKEN"))
-    }
-
-    patchPluginXml {
-        changeNotes = provider {
-            changelog.renderItem(
-                changelog
-                    .getUnreleased()
-                    .withHeader(false)
-                    .withEmptySections(false),
-                Changelog.OutputType.HTML
-            )
-        }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
