@@ -4,9 +4,8 @@ import com.intellij.execution.CantRunException;
 import com.intellij.execution.configurations.JavaParameters;
 import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.execution.util.JavaParametersUtil;
-import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
@@ -23,7 +22,6 @@ import java.util.Set;
 
 final class JavaParametersCreator {
     private static final Logger LOG = Logger.getInstance(JavaParametersCreator.class);
-    private static final String PLUGIN_ID = "io.github.nahuel92.pit4u";
     private static Collection<String> PIT_LIBS;
 
     public static JavaParameters create(@NotNull final JavaRunConfigurationModule configurationModule,
@@ -51,19 +49,17 @@ final class JavaParametersCreator {
     }
 
     private static Collection<String> getPitLibs() {
-        final var pluginDescriptor = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
-        if (pluginDescriptor == null) {
-            LOG.error("Could not find plugin descriptor for " + PLUGIN_ID);
-            return Set.of();
-        }
-
-        final var libPath = pluginDescriptor.getPluginPath().resolve("lib");
+        final var libPath = PathManager.getPluginsDir()
+                .resolve("pit4u")
+                .resolve("lib");
         if (!Files.exists(libPath)) {
             return Set.of();
         }
 
         try (final var walk = Files.walk(libPath)) {
-            return walk.filter(path -> {
+            return walk
+                    .filter(Files::isRegularFile)
+                    .filter(path -> {
                         final var name = path.getFileName().toString();
                         return name.startsWith("pitest") || name.startsWith("commons");
                     })

@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-06-09
+## [0.3.0] - 2026-06-10
 
 ### Added
 
@@ -10,10 +10,10 @@
 
 ### Changed
 
-- Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
+- Upgraded to Java 25
 - Changelog reporting now uses Jetbrains' changelog plugin
 - Removed `untilBuild` version
-- Upgraded to Java 25
+- Updated dependencies
 
 ### Fixed
 
@@ -140,31 +140,17 @@
 - First release that adds a new configuration to run PIT mutation tests
 
 [Unreleased]: https://github.com/Nahuel92/pit4u/compare/0.3.0...HEAD
-
 [0.3.0]: https://github.com/Nahuel92/pit4u/compare/0.2.5...0.3.0
-
 [0.2.5]: https://github.com/Nahuel92/pit4u/compare/0.2.4...0.2.5
-
 [0.2.4]: https://github.com/Nahuel92/pit4u/compare/0.2.3...0.2.4
-
 [0.2.3]: https://github.com/Nahuel92/pit4u/compare/0.2.2...0.2.3
-
 [0.2.2]: https://github.com/Nahuel92/pit4u/compare/0.2.1...0.2.2
-
 [0.2.1]: https://github.com/Nahuel92/pit4u/compare/0.2.0...0.2.1
-
 [0.2.0]: https://github.com/Nahuel92/pit4u/compare/0.1.6...0.2.0
-
 [0.1.6]: https://github.com/Nahuel92/pit4u/compare/0.1.5...0.1.6
-
 [0.1.5]: https://github.com/Nahuel92/pit4u/compare/0.1.4...0.1.5
-
 [0.1.4]: https://github.com/Nahuel92/pit4u/compare/0.1.3...0.1.4
-
 [0.1.3]: https://github.com/Nahuel92/pit4u/compare/0.1.2...0.1.3
-
 [0.1.2]: https://github.com/Nahuel92/pit4u/compare/0.1.1...0.1.2
-
 [0.1.1]: https://github.com/Nahuel92/pit4u/compare/0.1.0...0.1.1
-
 [0.1.0]: https://github.com/Nahuel92/pit4u/commits/0.1.0

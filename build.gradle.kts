@@ -3,7 +3,6 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
-    id("java")
     id("org.jetbrains.changelog") version "2.5.0"
     id("org.jetbrains.intellij.platform") version "2.16.0"
 }
@@ -61,7 +60,7 @@ intellijPlatform {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml:3.2.0")
     implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")
@@ -71,7 +70,7 @@ dependencies {
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.idea.maven")
         bundledPlugin("com.intellij.gradle")
-
+        bundledPlugin("com.intellij.java")
         pluginVerifier()
         zipSigner()
 
