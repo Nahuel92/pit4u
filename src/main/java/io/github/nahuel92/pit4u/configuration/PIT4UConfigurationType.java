@@ -3,7 +3,7 @@ package io.github.nahuel92.pit4u.configuration;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.util.NotNullLazyValue;
-import io.github.nahuel92.pit4u.icon.PIT4UIcon;
+import io.github.nahuel92.pit4u.icons.PIT4UIcon;
 
 import java.util.Objects;
 
@@ -14,7 +14,7 @@ public final class PIT4UConfigurationType extends ConfigurationTypeBase {
         super(
                 ID,
                 "PIT4U",
-                "PIT runner that assess your tests strength",
+                "PIT runner that assesses test strength",
                 NotNullLazyValue.createValue(() -> Objects.requireNonNullElse(PIT4UIcon.ICON, AllIcons.Empty))
         );
         addFactory(new PIT4UConfigurationFactory(this));

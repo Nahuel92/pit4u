@@ -1,4 +1,4 @@
-package io.github.nahuel92.pit4u.icon;
+package io.github.nahuel92.pit4u.icons;
 
 import com.intellij.openapi.util.IconLoader;
 
