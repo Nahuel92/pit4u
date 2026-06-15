@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Plugin internal improvements to highlighting
+
 ### Fixed
 
 - Error due to action id already taken (by the same action)
+- Typo in Configuration Type description
 
 ## [0.3.0] - 2026-06-10
 

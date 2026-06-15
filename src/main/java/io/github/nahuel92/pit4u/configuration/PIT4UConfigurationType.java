@@ -14,7 +14,7 @@ public final class PIT4UConfigurationType extends ConfigurationTypeBase {
         super(
                 ID,
                 "PIT4U",
-                "PIT runner that assess your tests strength",
+                "PIT runner that assesses test strength",
                 NotNullLazyValue.createValue(() -> Objects.requireNonNullElse(PIT4UIcon.ICON, AllIcons.Empty))
         );
         addFactory(new PIT4UConfigurationFactory(this));
