@@ -2,14 +2,16 @@
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-06-15
+
 ### Changed
 
-- Plugin internal improvements to highlighting
+- Refactored highlighting logic to reduce unnecessary memory allocations
 
 ### Fixed
 
-- Error due to action id already taken (by the same action)
-- Typo in Configuration Type description
+- Resolved an initialization crash/error caused by redundant internal action registrations
+- Corrected a grammatical typo in the Run Configuration description
 
 ## [0.3.0] - 2026-06-10
 
@@ -148,7 +150,9 @@
 
 - First release that adds a new configuration to run PIT mutation tests
 
-[Unreleased]: https://github.com/Nahuel92/pit4u/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/Nahuel92/pit4u/compare/0.3.1...HEAD
+
+[0.3.1]: https://github.com/Nahuel92/pit4u/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/Nahuel92/pit4u/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/Nahuel92/pit4u/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/Nahuel92/pit4u/compare/0.2.3...0.2.4

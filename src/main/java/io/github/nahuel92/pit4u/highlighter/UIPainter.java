@@ -16,36 +16,45 @@ import java.util.stream.Collectors;
 
 public final class UIPainter {
     private static final Key<String> PIT_TOOLTIP_KEY = Key.create("PIT_TOOLTIP");
+    private static final MutationResult KILLED_RESULT = getKilledResult();
+    private static final MutationResult SURVIVED_RESULT = getSurvivedResult();
+    private static final MutationResult NO_COVERAGE_RESULT = getNoCoverageResult();
 
-    private static final TextAttributes KILLED_ATTRS = createTextAttributes(
-            new Color(215, 245, 215),
-            new Color(43, 68, 43)
-    );
-    private static final LineIcon KILLED_GUTTER_ICON = new LineIcon(
-            new JBColor(
-                    new Color(46, 139, 87),
-                    new Color(60, 179, 113)
-            )
-    );
-    private static final MutationResult KILLED_RESULT = new MutationResult(KILLED_ATTRS, KILLED_GUTTER_ICON);
+    private static MutationResult getKilledResult() {
+        final var textAttributes = createTextAttributes(
+                new Color(215, 245, 215),
+                new Color(43, 68, 43)
+        );
+        final var gutterIcon = new LineIcon(
+                new JBColor(
+                        new Color(46, 139, 87),
+                        new Color(60, 179, 113)
+                )
+        );
+        return new MutationResult(textAttributes, gutterIcon);
+    }
 
-    private static final TextAttributes SURVIVED_ATTRS = createTextAttributes(
-            new Color(255, 215, 215),
-            new Color(75, 43, 43)
-    );
-    private static final LineIcon SURVIVED_GUTTER_ICON = new LineIcon(
-            new JBColor(
-                    new Color(178, 34, 34),
-                    new Color(220, 20, 60))
-    );
-    private static final MutationResult SURVIVED_RESULT = new MutationResult(SURVIVED_ATTRS, SURVIVED_GUTTER_ICON);
+    private static MutationResult getSurvivedResult() {
+        final var textAttributes = createTextAttributes(
+                new Color(255, 215, 215),
+                new Color(75, 43, 43)
+        );
+        final var gutterIcon = new LineIcon(
+                new JBColor(
+                        new Color(178, 34, 34),
+                        new Color(220, 20, 60))
+        );
+        return new MutationResult(textAttributes, gutterIcon);
+    }
 
-    private static final TextAttributes NO_COVERAGE_ATTRS = createTextAttributes(
-            new Color(242, 242, 242),
-            new Color(53, 53, 53)
-    );
-    private static final LineIcon NO_COVERAGE_GUTTER_ICON = new LineIcon(JBColor.GRAY);
-    private static final MutationResult NO_COVERAGE_RESULT = new MutationResult(NO_COVERAGE_ATTRS, NO_COVERAGE_GUTTER_ICON);
+    private static MutationResult getNoCoverageResult() {
+        final var textAttributes = createTextAttributes(
+                new Color(242, 242, 242),
+                new Color(53, 53, 53)
+        );
+        final var gutterIcon = new LineIcon(JBColor.GRAY);
+        return new MutationResult(textAttributes, gutterIcon);
+    }
 
     private static TextAttributes createTextAttributes(final Color regular, final Color dark) {
         return new TextAttributes(
