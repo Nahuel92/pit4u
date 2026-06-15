@@ -13,19 +13,19 @@
     <depends>com.intellij.gradle</depends>
 
     <actions>
-        <action id="io.github.nahuel92.pit4u.action.PIT4UAction" class="io.github.nahuel92.pit4u.action.PIT4UAction"
-                text="Pit4UPopUpMenuAction" description="Mutate all classes in this package">
+        <action id="io.github.nahuel92.pit4u.action.PIT4UAction"
+                class="io.github.nahuel92.pit4u.action.PIT4UAction"
+                text="Pit4UPopUpMenuAction"
+                description="Mutate all classes in this package"
+                icon="/icons/pit4u.svg">
             <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
         </action>
         <action id="io.github.nahuel92.pit4u.action.ClearPitHighlights"
                 class="io.github.nahuel92.pit4u.action.ClearPitHighlightsAction"
                 text="Clear PIT Highlights"
-                description="Removes all mutation coverage overlays from the editor">
+                description="Removes all mutation coverage overlays from the editor"
+                icon="/icons/pit4u.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-        </action>
-        <action id="io.github.nahuel92.pit4u.action.ClearPitHighlights"
-                class="io.github.nahuel92.pit4u.action.ClearPitHighlightsAction"
-                text="Clear PIT Highlights">
             <add-to-group group-id="EditorGutterPopupMenu" anchor="last"/>
         </action>
     </actions>

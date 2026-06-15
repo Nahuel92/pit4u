@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Error due to action id already taken (by the same action)
+
 ## [0.3.0] - 2026-06-10
 
 ### Added

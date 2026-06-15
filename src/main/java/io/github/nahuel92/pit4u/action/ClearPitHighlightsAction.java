@@ -5,14 +5,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import io.github.nahuel92.pit4u.highlighter.MutationDataService;
-import io.github.nahuel92.pit4u.icon.PIT4UIcon;
 import org.jetbrains.annotations.NotNull;
 
 public final class ClearPitHighlightsAction extends AnAction {
-    ClearPitHighlightsAction() {
-        getTemplatePresentation().setIcon(PIT4UIcon.ICON);
-    }
-
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
         final var project = e.getProject();
