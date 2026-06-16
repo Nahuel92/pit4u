@@ -108,7 +108,7 @@ public final class PIT4URunConfiguration
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve("mutations1.xml")
+                                        .resolve("mutations.xml")
                                         .toAbsolutePath();
                                 if (!Files.exists(path)) {
                                     final var error = "Could not find mutations.xml at %s.".formatted(path);
