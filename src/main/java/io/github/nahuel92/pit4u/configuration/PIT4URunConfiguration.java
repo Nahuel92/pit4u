@@ -107,11 +107,13 @@ public final class PIT4URunConfiguration
                         new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
+                                final var mutationDataFileName = "mutations.xml";
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve("mutations.xml")
+                                        .resolve(mutationDataFileName)
                                         .toAbsolutePath();
                                 if (!Files.exists(path)) {
-                                    final var error = "Could not find mutations.xml at %s.".formatted(path);
+                                    final var error = "Could not find %s at %s."
+                                            .formatted(mutationDataFileName, path);
                                     consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
                                     return;
                                 }
