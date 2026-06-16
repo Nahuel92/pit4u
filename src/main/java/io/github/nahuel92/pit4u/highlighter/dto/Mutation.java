@@ -12,7 +12,8 @@ public record Mutation(
         @JsonProperty("lineNumber") int lineNumber,
         @JsonProperty("description") String description) {
     public enum Status {
+        @JsonProperty("KILLED") KILLED,
         @JsonProperty("NO_COVERAGE") NO_COVERAGE,
-        @JsonProperty("KILLED") KILLED
+        @JsonProperty("SURVIVED") SURVIVED
     }
 }

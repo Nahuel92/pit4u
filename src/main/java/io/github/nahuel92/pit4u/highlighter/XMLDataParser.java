@@ -17,7 +17,7 @@ public final class XMLDataParser {
         try {
             return XML_MAPPER.readValue(path.toFile(), Mutations.class);
         } catch (final JacksonException e) {
-            LOG.error("Failed to parse PIT XML file", e);
+            LOG.warn("Failed to parse PIT XML file", e);
             throw new UncheckedException(e);
         }
     }
