@@ -15,6 +15,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.ExternalSystemModulePropertyManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
@@ -47,16 +48,12 @@ public final class PIT4UAction extends AnAction {
         final var psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         if (psiElement instanceof PsiDirectory psiDirectory) {
             final var scope = new DirectoryScope(project, psiDirectory.getVirtualFile(), true);
-            final var containsJavaFiles = FileTypeIndex.containsFileOfType(
-                    JavaFileType.INSTANCE,
-                    scope
-            );
             final var containsTestFiles = FileTypeIndex.processFiles(
                     JavaFileType.INSTANCE,
                     a -> a.getPath().contains("test"),
                     scope
             );
-            return containsJavaFiles && !containsTestFiles;
+            return !containsTestFiles;
         }
         return psiElement instanceof PsiClass psiClass &&
                 !psiClass.getContainingFile()
@@ -160,23 +157,27 @@ public final class PIT4UAction extends AnAction {
                 .collect(Collectors.joining(","));
     }
 
-    private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig) {
-        final var executionBuilder = getExecEnvBuilder(runConfig);
+    private static void executeRunConfiguration(final RunnerAndConfigurationSettings runConfig, final Module module) {
+        final var executionBuilder = getExecEnvBuilder(runConfig, module);
         if (executionBuilder.isEmpty()) {
-            LOG.error("ExecutionBuilder is empty");
+            LOG.warn("ExecutionBuilder is empty");
             return;
         }
         ProgramRunnerUtil.executeConfiguration(executionBuilder.get(), true, true);
     }
 
-    private static Optional<ExecutionEnvironment> getExecEnvBuilder(final RunnerAndConfigurationSettings runConfig) {
+    private static Optional<ExecutionEnvironment> getExecEnvBuilder(final RunnerAndConfigurationSettings runConfig, final Module module) {
         try {
-            return Optional.of(ExecutionEnvironmentBuilder.create(DefaultRunExecutor.getRunExecutorInstance(), runConfig)
+            final var environment = ExecutionEnvironmentBuilder.create(
+                            DefaultRunExecutor.getRunExecutorInstance(),
+                            runConfig
+                    )
                     .activeTarget()
-                    .build()
-            );
+                    .build();
+            environment.putUserData(PIT4URunConfiguration.CONTEXT_MODULE, module);
+            return Optional.of(environment);
         } catch (final ExecutionException ex) {
-            LOG.error("Failed to create execution environment", ex);
+            LOG.warn("Failed to create execution environment", ex);
             return Optional.empty();
         }
     }
@@ -188,6 +189,23 @@ public final class PIT4UAction extends AnAction {
     }
 
     @Override
+    public void actionPerformed(@NotNull final AnActionEvent e) {
+        final var project = e.getProject();
+        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        if (project == null || project.getBasePath() == null || module == null) {
+            return;
+        }
+        final var runManager = RunManager.getInstance(project);
+        final var runConfig = getRunConfig(runManager);
+        if (!(runConfig.getConfiguration() instanceof PIT4URunConfiguration config)) {
+            LOG.warn("PIT4URunConfiguration wasn't found!");
+            return;
+        }
+        config.setPit4UEditorStatus(getPit4UEditorStatus(e, project, project.getBasePath()));
+        executeRunConfiguration(runConfig, module);
+    }
+
+    @Override
     public void update(@NotNull final AnActionEvent e) {
         if (!shouldShow(e)) {
             e.getPresentation().setEnabledAndVisible(false);
@@ -196,26 +214,11 @@ public final class PIT4UAction extends AnAction {
         e.getPresentation().setEnabledAndVisible(true);
         final var element = e.getData(CommonDataKeys.PSI_ELEMENT);
         switch (element) {
-            case PsiDirectory psiDirectory when isProjectRoot(e.getProject(), psiDirectory) -> setProjectLabel(e);
+            case PsiDirectory psiDirectory when isProjectRoot(e.getProject(), psiDirectory) ->
+                    setProjectLabel(e);
             case PsiDirectory psiDirectory -> setDirectoryLabel(e, psiDirectory);
             case PsiClass psiClass -> setClassLabel(e, psiClass);
             case null, default -> throw new IllegalStateException("Unexpected value: " + element);
         }
-    }
-
-    @Override
-    public void actionPerformed(@NotNull final AnActionEvent e) {
-        final var project = e.getProject();
-        if (project == null || project.getBasePath() == null) {
-            return;
-        }
-        final var runManager = RunManager.getInstance(project);
-        final var runConfig = getRunConfig(runManager);
-        if (!(runConfig.getConfiguration() instanceof PIT4URunConfiguration config)) {
-            LOG.error("PIT4URunConfiguration wasn't found!");
-            return;
-        }
-        config.setPit4UEditorStatus(getPit4UEditorStatus(e, project, project.getBasePath()));
-        executeRunConfiguration(runConfig);
     }
 }

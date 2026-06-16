@@ -67,7 +67,7 @@ final class JavaParametersCreator {
                     .map(Path::toString)
                     .toList();
         } catch (final IOException e) {
-            LOG.error("Failure when walking PIT4U library path: " + libPath, e);
+            LOG.warn("Failure when walking PIT4U library path: " + libPath, e);
             return Set.of();
         }
     }
@@ -116,7 +116,7 @@ final class JavaParametersCreator {
                     null
             );
         } catch (final CantRunException e) {
-            LOG.error("Failure when configuring module", e);
+            LOG.warn("Failure when configuring module", e);
         }
     }
 }

@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-06-15
+
+### Changed
+
+- The output format now defaults to XML automatically so the editor highlighter works out of the
+  box, removing the need for manual configuration
+- Optimized the background logic for determining when to display the action button
+- Reduced unnecessary internal log levels from `ERROR` to `WARN` (native UI notifications for
+  execution errors are planned for a future release)
+
+### Fixed
+
+- A critical bug surrounding data parsing of mutation reports
+
 ## [0.3.1] - 2026-06-15
 
 ### Changed
@@ -82,7 +96,8 @@
 
 ### Added
 
-- PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects might not work well)
+- PIT4U contextual action is now available for Maven and Gradle projects (multi-module projects
+  might not work well)
 
 ### Changed
 
@@ -150,8 +165,9 @@
 
 - First release that adds a new configuration to run PIT mutation tests
 
-[Unreleased]: https://github.com/Nahuel92/pit4u/compare/0.3.1...HEAD
+[Unreleased]: https://github.com/Nahuel92/pit4u/compare/0.3.2...HEAD
 
+[0.3.2]: https://github.com/Nahuel92/pit4u/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/Nahuel92/pit4u/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/Nahuel92/pit4u/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/Nahuel92/pit4u/compare/0.2.4...0.2.5

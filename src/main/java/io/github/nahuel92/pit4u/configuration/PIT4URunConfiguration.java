@@ -32,6 +32,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
@@ -57,6 +58,8 @@ import java.util.regex.Pattern;
 public final class PIT4URunConfiguration
         extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
+    public static final Key<Module> CONTEXT_MODULE = Key.create("PIT4U_CONTEXT_MODULE");
+
     private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
@@ -78,12 +81,15 @@ public final class PIT4URunConfiguration
 
     @Override
     public RunProfileState getState(@NotNull final Executor executor, @NotNull final ExecutionEnvironment environment) {
+        final var contextualModule = environment.getUserData(CONTEXT_MODULE);
+        final var effectiveModule = (contextualModule != null) ? contextualModule : getConfigurationModule().getModule();
+
         final var javaCommandLineState = new JavaCommandLineState(environment) {
             private ConsoleView consoleView;
 
             @Override
             protected JavaParameters createJavaParameters() {
-                final var alignedPath = resolveLauncherPathSynchronously(getEnvironment());
+                final var alignedPath = resolveLauncherPathSynchronously(getEnvironment(), effectiveModule);
                 return JavaParametersCreator.create(
                         getConfigurationModule(),
                         getProject(),
@@ -102,12 +108,11 @@ public final class PIT4URunConfiguration
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve("mutations.xml")
+                                        .resolve("mutations1.xml")
                                         .toAbsolutePath();
                                 if (!Files.exists(path)) {
                                     final var error = "Could not find mutations.xml at %s.".formatted(path);
                                     consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
-                                    LOG.error(error);
                                     return;
                                 }
 
@@ -180,13 +185,13 @@ public final class PIT4URunConfiguration
         this.pit4UEditorStatus = pit4UEditorStatus;
     }
 
-    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment) {
-        final var project = environment.getProject();
-        final var module = getConfigurationModule().getModule();
+    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment, Module module) {
         if (module == null) {
+            LOG.warn("Cannot resolve JUnit platform launcher path because module is null!");
             return StringUtils.EMPTY;
         }
 
+        final var project = environment.getProject();
         final var detectedVersion = ApplicationManager.getApplication()
                 .runReadAction((Computable<String>) () -> detectJUnitPlatformVersion(module));
         if (detectedVersion == null) {
