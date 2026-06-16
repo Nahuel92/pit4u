@@ -12,8 +12,12 @@ public record Mutation(
         @JsonProperty("lineNumber") int lineNumber,
         @JsonProperty("description") String description) {
     public enum Status {
+        @JsonProperty("EQUIVALENT") EQUIVALENT,
         @JsonProperty("KILLED") KILLED,
+        @JsonProperty("MEMORY_ERROR") MEMORY_ERROR,
         @JsonProperty("NO_COVERAGE") NO_COVERAGE,
-        @JsonProperty("SURVIVED") SURVIVED
+        @JsonProperty("RUN_ERROR") RUN_ERROR,
+        @JsonProperty("SURVIVED") SURVIVED,
+        @JsonProperty("TIMED_OUT") TIMED_OUT,
     }
 }
