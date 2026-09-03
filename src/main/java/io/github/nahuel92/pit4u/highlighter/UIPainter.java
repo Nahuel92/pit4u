@@ -8,6 +8,7 @@ import com.intellij.psi.PsiClassOwner;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.JBColor;
 import io.github.nahuel92.pit4u.highlighter.dto.Mutation;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 import java.awt.Color;
@@ -25,13 +26,7 @@ public final class UIPainter {
                 new Color(215, 245, 215),
                 new Color(43, 68, 43)
         );
-        final var gutterIcon = new LineIcon(
-                new JBColor(
-                        new Color(46, 139, 87),
-                        new Color(60, 179, 113)
-                )
-        );
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.GREEN);
     }
 
     private static MutationResult getSurvivedResult() {
@@ -39,12 +34,7 @@ public final class UIPainter {
                 new Color(255, 215, 215),
                 new Color(75, 43, 43)
         );
-        final var gutterIcon = new LineIcon(
-                new JBColor(
-                        new Color(178, 34, 34),
-                        new Color(220, 20, 60))
-        );
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.RED);
     }
 
     private static MutationResult getNoCoverageResult() {
@@ -52,8 +42,7 @@ public final class UIPainter {
                 new Color(242, 242, 242),
                 new Color(53, 53, 53)
         );
-        final var gutterIcon = new LineIcon(JBColor.GRAY);
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.GRAY);
     }
 
     private static TextAttributes createTextAttributes(final Color regular, final Color dark) {
@@ -66,11 +55,19 @@ public final class UIPainter {
         );
     }
 
+    public static void removeHighlighters(@NotNull final Editor editor) {
+        for (final var highlighter : editor.getMarkupModel().getAllHighlighters()) {
+            if (highlighter.getUserData(PIT_TOOLTIP_KEY) != null) {
+                editor.getMarkupModel().removeHighlighter(highlighter);
+            }
+        }
+    }
+
     public static void paintEditor(final Editor editor, final PsiFile psiFile) {
         if (!(psiFile instanceof PsiClassOwner classOwner)) {
             return;
         }
-        editor.getMarkupModel().removeAllHighlighters();
+        removeHighlighters(editor);
         final var classes = classOwner.getClasses();
         if (classes.length == 0) {
             return;
@@ -82,10 +79,6 @@ public final class UIPainter {
 
         final var dataService = MutationDataService.getInstance(psiFile.getProject());
         final var mutations = dataService.getMutationsForClass(fqName);
-        if (mutations == null || mutations.isEmpty()) {
-            return;
-        }
-
         final var totalLines = editor.getDocument().getLineCount();
         final var mutationsByLine = mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::lineNumber));

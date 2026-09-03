@@ -12,7 +12,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.PlatformCoreDataKeys;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.ExternalSystemModulePropertyManager;
 import com.intellij.openapi.module.Module;
@@ -41,19 +41,18 @@ public final class PIT4UAction extends AnAction {
 
     private static boolean shouldShow(final AnActionEvent e) {
         final var project = e.getProject();
-        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        final var module = e.getData(PlatformDataKeys.MODULE);
         if (project == null || module == null) {
             return false;
         }
         final var psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         if (psiElement instanceof PsiDirectory psiDirectory) {
             final var scope = new DirectoryScope(project, psiDirectory.getVirtualFile(), true);
-            final var containsTestFiles = FileTypeIndex.processFiles(
+            return FileTypeIndex.processFiles(
                     JavaFileType.INSTANCE,
-                    a -> a.getPath().contains("test"),
+                    a -> !a.getPath().contains("/test/"),
                     scope
             );
-            return !containsTestFiles;
         }
         return psiElement instanceof PsiClass psiClass &&
                 !psiClass.getContainingFile()
@@ -95,7 +94,7 @@ public final class PIT4UAction extends AnAction {
     }
 
     private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
-        final var runConfig = runManager.findConfigurationByName("PIT4URunConfiguration");
+        final var runConfig = runManager.findConfigurationByName("PIT4U Action");
         if (runConfig != null) {
             return runConfig;
         }
@@ -118,7 +117,7 @@ public final class PIT4UAction extends AnAction {
     }
 
     private static void setSourceAndReportDirs(final AnActionEvent e, final PIT4UEditorStatus status, final String basePath) {
-        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        final var module = e.getData(PlatformDataKeys.MODULE);
         if (module == null) {
             return;
         }
@@ -132,6 +131,7 @@ public final class PIT4UAction extends AnAction {
         if ("gradle".equalsIgnoreCase(propManager.getExternalSystemId())) {
             status.setReportDir(path.resolve("build").toString());
             status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
+            return;
         }
         LOG.info("Module is not using Maven or Gradle as build system!");
     }
@@ -154,6 +154,7 @@ public final class PIT4UAction extends AnAction {
                 .map(PsiManager.getInstance(project)::findFile)
                 .filter(e -> e instanceof PsiJavaFile)
                 .map(e -> ((PsiJavaFile) e).getPackageName() + ".*")
+                .distinct()
                 .collect(Collectors.joining(","));
     }
 
@@ -191,7 +192,7 @@ public final class PIT4UAction extends AnAction {
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
         final var project = e.getProject();
-        final var module = e.getData(PlatformCoreDataKeys.MODULE);
+        final var module = e.getData(PlatformDataKeys.MODULE);
         if (project == null || project.getBasePath() == null || module == null) {
             return;
         }
@@ -218,7 +219,7 @@ public final class PIT4UAction extends AnAction {
                     setProjectLabel(e);
             case PsiDirectory psiDirectory -> setDirectoryLabel(e, psiDirectory);
             case PsiClass psiClass -> setClassLabel(e, psiClass);
-            case null, default -> throw new IllegalStateException("Unexpected value: " + element);
+            case null, default -> e.getPresentation().setEnabledAndVisible(false);
         }
     }
 }

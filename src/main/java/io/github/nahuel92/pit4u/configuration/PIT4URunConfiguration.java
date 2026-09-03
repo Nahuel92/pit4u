@@ -204,6 +204,7 @@ public final class PIT4URunConfiguration
             return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
                     .get(5, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             return StringUtils.EMPTY;
         }
     }

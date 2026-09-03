@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import io.github.nahuel92.pit4u.highlighter.MutationDataService;
+import io.github.nahuel92.pit4u.highlighter.UIPainter;
 import org.jetbrains.annotations.NotNull;
 
 public final class ClearPitHighlightsAction extends AnAction {
@@ -18,10 +19,11 @@ public final class ClearPitHighlightsAction extends AnAction {
 
         final var fileEditorManager = FileEditorManager.getInstance(project);
         for (var editorWrapper : fileEditorManager.getAllEditors()) {
-            if (editorWrapper instanceof TextEditor textEditor) {
-                final var editor = textEditor.getEditor();
-                editor.getMarkupModel().removeAllHighlighters();
+            if (!(editorWrapper instanceof TextEditor textEditor)) {
+                continue;
             }
+            final var editor = textEditor.getEditor();
+            UIPainter.removeHighlighters(editor);
         }
     }
 
