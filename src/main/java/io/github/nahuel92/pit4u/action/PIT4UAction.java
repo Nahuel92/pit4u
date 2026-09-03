@@ -17,6 +17,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.ExternalSystemModulePropertyManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.psi.JavaDirectoryService;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDirectory;
@@ -25,6 +26,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiPackage;
 import com.intellij.psi.PsiQualifiedNamedElement;
 import com.intellij.psi.search.FileTypeIndex;
+import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.psi.search.GlobalSearchScopesCore.DirectoryScope;
 import io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType;
 import io.github.nahuel92.pit4u.configuration.PIT4UEditorStatus;
@@ -47,12 +49,20 @@ public final class PIT4UAction extends AnAction {
         }
         final var psiElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         if (psiElement instanceof PsiDirectory psiDirectory) {
-            final var scope = new DirectoryScope(project, psiDirectory.getVirtualFile(), true);
-            return FileTypeIndex.processFiles(
-                    JavaFileType.INSTANCE,
-                    a -> !a.getPath().contains("/test/"),
-                    scope
-            );
+            final var virtualFile = psiDirectory.getVirtualFile();
+            final var fileIndex = ProjectFileIndex.getInstance(project);
+
+            if (!fileIndex.isInContent(virtualFile)) {
+                return false;
+            }
+
+            if (fileIndex.isInSourceContent(virtualFile) && fileIndex.isInTestSourceContent(virtualFile)) {
+                return false;
+            }
+
+            final var dirScope = GlobalSearchScopesCore.directoryScope(project, virtualFile, true);
+            final var productionDirScope = dirScope.intersectWith(GlobalSearchScopesCore.projectProductionScope(project));
+            return FileTypeIndex.containsFileOfType(JavaFileType.INSTANCE, productionDirScope);
         }
         return psiElement instanceof PsiClass psiClass &&
                 !psiClass.getContainingFile()
