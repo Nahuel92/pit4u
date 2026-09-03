@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiClassOwner;
 import com.intellij.psi.PsiFile;
+import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import io.github.nahuel92.pit4u.highlighter.dto.Mutation;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,15 @@ public final class UIPainter {
     private static final MutationResult KILLED_RESULT = getKilledResult();
     private static final MutationResult SURVIVED_RESULT = getSurvivedResult();
     private static final MutationResult NO_COVERAGE_RESULT = getNoCoverageResult();
+
+    private static final JBColor KILLED_BADGE_COLOR = new JBColor(
+            new Color(46, 139, 87),   // Light theme green
+            new Color(98, 209, 137)   // Dark theme readable green
+    );
+    private static final JBColor SURVIVED_BADGE_COLOR = new JBColor(
+            new Color(178, 34, 34),   // Light theme red
+            new Color(240, 100, 100)  // Dark theme readable red
+    );
 
     private static MutationResult getKilledResult() {
         final var textAttributes = createTextAttributes(
@@ -134,15 +144,17 @@ public final class UIPainter {
                 .append("<ul style='margin-left: 15px; padding-left: 0;'>");
 
         for (final var mutation : lineMutations) {
-            final var badgeColor = mutation.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
+            final var badgeColor = mutation.status() == Mutation.Status.KILLED
+                    ? KILLED_BADGE_COLOR
+                    : SURVIVED_BADGE_COLOR;
+            final var hexColor = ColorUtil.toHex(badgeColor);
             htmlBuilder.append("<li style='margin-bottom: 8px;'>")
-                    .append("<span style='color: ").append(badgeColor).append("; font-weight: bold;'>[")
+                    .append("<span style='color: ").append(hexColor).append("; font-weight: bold;'>[")
                     .append(mutation.status()).append("]</span> ")
                     .append("<b>Method:</b> ").append(mutation.mutatedMethod()).append("<br/>")
                     .append("<b>Detail:</b> ").append(mutation.description() != null ? mutation.description() : "None")
                     .append("</li>");
         }
-
         htmlBuilder.append("</ul>")
                 .append("</div>")
                 .append("</body></html>");

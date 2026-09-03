@@ -72,13 +72,15 @@ public final class OtherParamsTableModel extends ListTableModel<OtherParamItem<?
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (columnIndex == 0) {
-            return getItems().get(rowIndex).name();
+        if (rowIndex < 0 || rowIndex >= getItems().size()) {
+            return null;
         }
-        if (columnIndex == 1) {
-            return getItems().get(rowIndex).value();
-        }
-        throw new IndexOutOfBoundsException();
+        final var item = getItems().get(rowIndex);
+        return switch (columnIndex) {
+            case 0 -> item.name();
+            case 1 -> item.value();
+            default -> super.getValueAt(rowIndex, columnIndex);
+        };
     }
 
     @Override

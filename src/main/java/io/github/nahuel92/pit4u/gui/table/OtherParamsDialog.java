@@ -4,6 +4,8 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.TableView;
+import com.intellij.util.ui.JBUI;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -32,8 +34,15 @@ public final class OtherParamsDialog extends DialogWrapper implements Disposable
 
         setTitle("Pit4U - Other Parameters");
         final var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setSize(screenSize.width - 400, screenSize.height - 400);
+        //setSize(screenSize.width - 400, screenSize.height - 400);
+        this.table.setPreferredScrollableViewportSize(JBUI.size(750, 450));
         init();
+    }
+
+    @Override
+    @NonNull
+    protected String getDimensionServiceKey() {
+        return "io.github.nahuel92.pit4u.gui.table.OtherParamsDialog";
     }
 
     @Override

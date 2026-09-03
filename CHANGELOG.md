@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
+
 ### Fixed
 
 - Data-parsing for some mutation statuses

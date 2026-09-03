@@ -118,8 +118,8 @@ public final class PIT4URunConfiguration
                                     return;
                                 }
 
-                                final var results = XMLDataParser.parse(path);
                                 ApplicationManager.getApplication().invokeLater(() -> {
+                                    final var results = XMLDataParser.parse(path);
                                             MutationDataService.getInstance(getProject()).loadData(results.mutations());
                                             final var fileEditorManager = FileEditorManager.getInstance(getProject());
                                             for (final var editorWrapper : fileEditorManager.getAllEditors()) {
