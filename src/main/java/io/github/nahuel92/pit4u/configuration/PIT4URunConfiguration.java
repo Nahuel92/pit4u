@@ -43,7 +43,6 @@ import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
 import io.github.nahuel92.pit4u.highlighter.MutationDataService;
 import io.github.nahuel92.pit4u.highlighter.UIPainter;
 import io.github.nahuel92.pit4u.highlighter.XMLDataParser;
-import org.apache.commons.lang3.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
@@ -63,7 +62,7 @@ public final class PIT4URunConfiguration
     public static final Key<Module> CONTEXT_MODULE = Key.create("PIT4U_CONTEXT_MODULE");
 
     private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
-    private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-(1\\.\\d+\\.\\d+)\\.jar");
+    private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-([\\w.-]+)\\.jar");
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
 
     PIT4URunConfiguration(final String name, final Project project, final ConfigurationFactory factory) {
@@ -206,25 +205,23 @@ public final class PIT4URunConfiguration
         this.pit4UEditorStatus = pit4UEditorStatus;
     }
 
-    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment, Module module) {
+    private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment, final Module module) {
         if (module == null) {
             LOG.warn("Cannot resolve JUnit platform launcher path because module is null!");
-            return StringUtils.EMPTY;
+            return null;
         }
-
         final var project = environment.getProject();
         final var detectedVersion = ApplicationManager.getApplication()
                 .runReadAction((Computable<String>) () -> detectJUnitPlatformVersion(module));
         if (detectedVersion == null) {
-            return StringUtils.EMPTY;
+            return null;
         }
-
         try {
             return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
                     .get(5, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
             Thread.currentThread().interrupt();
-            return StringUtils.EMPTY;
+            return null;
         }
     }
 
@@ -234,14 +231,17 @@ public final class PIT4URunConfiguration
                 .exportedOnly()
                 .classes()
                 .getRoots();
-
         for (final var file : files) {
             final var name = file.getName();
             final var matcher = DEPENDENCY_PATTERN.matcher(name);
-            if (matcher.find()) {
-                return matcher.group(1);
+            if (!matcher.find()) {
+                continue;
             }
+            final var junitPlatformEngineVersion = matcher.group(1);
+            LOG.debug("Found junit-platform-engine version: ", junitPlatformEngineVersion);
+            return junitPlatformEngineVersion;
         }
+        LOG.debug("Couldn't find junit-platform-engine version");
         return null;
     }
 
@@ -262,13 +262,15 @@ public final class PIT4URunConfiguration
                 )
                 .onSuccess(resolvedRoots -> {
                     if (resolvedRoots == null || resolvedRoots.isEmpty()) {
-                        future.complete(StringUtils.EMPTY);
+                        future.complete(null);
                         return;
                     }
                     final var cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
                     future.complete(cleanPath);
                 })
-                .onError(_ -> future.complete(StringUtils.EMPTY));
+                .onError(_ -> {
+                    future.complete(null);
+                });
         return future;
     }
 }

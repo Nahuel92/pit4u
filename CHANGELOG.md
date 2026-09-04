@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-09-04
+
+### Fixed
+
+- junit-platform-launcher dependency resolution
+
 ## [0.3.3] - 2026-09-03
 
 ### Added
@@ -184,7 +190,8 @@
 
 - First release that adds a new configuration to run PIT mutation tests
 
-[Unreleased]: https://github.com/Nahuel92/pit4u/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/Nahuel92/pit4u/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/Nahuel92/pit4u/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/Nahuel92/pit4u/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Nahuel92/pit4u/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Nahuel92/pit4u/compare/v0.3.0...v0.3.1

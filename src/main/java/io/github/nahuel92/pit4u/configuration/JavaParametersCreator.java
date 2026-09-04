@@ -13,6 +13,7 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.util.execution.ParametersListUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +28,7 @@ final class JavaParametersCreator {
     public static JavaParameters create(@NotNull final JavaRunConfigurationModule configurationModule,
                                         @NotNull final Project project,
                                         @NotNull final PIT4UEditorStatus pit4UEditorStatus,
-                                        @NotNull final String alignedLauncherPath) {
+                                        @Nullable final String alignedLauncherPath) {
         final var javaParameters = new JavaParameters();
         setModule(configurationModule, project);
         final var module = configurationModule.getModule();
@@ -89,9 +90,15 @@ final class JavaParametersCreator {
                 .getPathList()
                 .stream()
                 .anyMatch(e -> e.contains("junit-platform-launcher"));
-        if (!hasLauncher && alignedLauncherPath != null) {
-            javaParameters.getClassPath().addTail(alignedLauncherPath);
+
+        if (hasLauncher) {
+            return;
         }
+        if (alignedLauncherPath != null) {
+            javaParameters.getClassPath().addTail(alignedLauncherPath);
+            return;
+        }
+        throw new IllegalStateException("Unable to resolve 'junit-platform-launcher' dependency");
     }
 
     private static void configureModules(final Module module,
