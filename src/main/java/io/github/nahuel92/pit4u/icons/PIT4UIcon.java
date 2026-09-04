@@ -5,8 +5,8 @@ import com.intellij.openapi.util.IconLoader;
 import javax.swing.Icon;
 
 public interface PIT4UIcon {
-    Icon ICON = IconLoader.findIcon(
-            PIT4UIcon.class.getResource("/icons/pit4u.svg"),
-            false
+    Icon ICON = IconLoader.getIcon(
+            "/icons/pit4u.svg",
+            PIT4UIcon.class
     );
 }

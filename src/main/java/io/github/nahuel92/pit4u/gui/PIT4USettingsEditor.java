@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -120,22 +121,29 @@ public final class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfigurat
 
     private ActionListener getPackageChooserListener(final String title, final TextFieldWithBrowseButton field,
                                                      final Consumer<String> editorStatusConsumer) {
-        return e -> {
+        return _ -> {
             final var packageChooser = new PackageChooserDialog(title, project);
             final var component = packageChooser.getPreferredFocusedComponent();
+            KeyListener keyAdapter = null;
             if (component != null) {
-                component.addKeyListener(new KeyAdapter() {
+                keyAdapter = new KeyAdapter() {
                     @Override
                     public void keyPressed(final KeyEvent e) {
                         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                            getAndSetValue(packageChooser, field, editorStatusConsumer);
                             packageChooser.close(DialogWrapper.OK_EXIT_CODE);
                         }
                     }
-                });
+                };
+                component.addKeyListener(keyAdapter);
             }
-            if (packageChooser.showAndGet()) {
-                getAndSetValue(packageChooser, field, editorStatusConsumer);
+            try {
+                if (packageChooser.showAndGet()) {
+                    getAndSetValue(packageChooser, field, editorStatusConsumer);
+                }
+            } finally {
+                if (component != null && keyAdapter != null) {
+                    component.removeKeyListener(keyAdapter);
+                }
             }
         };
     }

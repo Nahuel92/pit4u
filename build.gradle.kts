@@ -4,14 +4,14 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     id("org.jetbrains.changelog") version "2.5.0"
-    id("org.jetbrains.intellij.platform") version "2.16.0"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
 }
 
 group = "io.github.nahuel92"
 
 val sinceVersion = "261"
 val pluginVersion = providers.gradleProperty("pluginVersion").get()
-val pitVersion = "1.25.3"
+val pitVersion = "1.30.0"
 
 repositories {
     mavenCentral()
@@ -60,7 +60,7 @@ intellijPlatform {
 }
 
 dependencies {
-    implementation("tools.jackson.dataformat:jackson-dataformat-xml:3.2.0")
+    implementation("tools.jackson.dataformat:jackson-dataformat-xml:3.2.2")
     implementation("org.pitest:pitest:$pitVersion")
     implementation("org.pitest:pitest-junit5-plugin:1.2.3")
     implementation("org.pitest:pitest-command-line:$pitVersion")

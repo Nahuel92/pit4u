@@ -28,12 +28,15 @@ import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
@@ -45,7 +48,6 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -111,27 +113,44 @@ public final class PIT4URunConfiguration
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
                                         .resolve(mutationDataFileName)
                                         .toAbsolutePath();
-                                if (!Files.exists(path)) {
-                                    final var error = "Could not find %s at %s."
-                                            .formatted(mutationDataFileName, path);
-                                    consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
-                                    return;
-                                }
 
-                                final var results = XMLDataParser.parse(path);
-                                ApplicationManager.getApplication().invokeLater(() -> {
-                                            MutationDataService.getInstance(getProject()).loadData(results.mutations());
-                                            final var fileEditorManager = FileEditorManager.getInstance(getProject());
+                                new Task.Backgroundable(getProject(), "Loading PIT mutation results", true) {
+                                    @Override
+                                    public void run(@NotNull final ProgressIndicator indicator) {
+                                        final var project = getProject();
+                                        if (project == null) {
+                                            return;
+                                        }
+                                        indicator.setIndeterminate(true);
+
+                                        final var virtualFile = VirtualFileManager.getInstance()
+                                                .refreshAndFindFileByNioPath(path);
+
+                                        if (virtualFile == null || !virtualFile.exists()) {
+                                            final var error = "Could not find %s at %s.".formatted(mutationDataFileName, path);
+                                            if (consoleView != null) {
+                                                consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
+                                            }
+                                            return;
+                                        }
+
+                                        final var results = XMLDataParser.parse(virtualFile);
+                                        MutationDataService.getInstance(project).loadData(results.mutations());
+
+                                        ApplicationManager.getApplication().invokeLater(() -> {
+                                            final var fileEditorManager = FileEditorManager.getInstance(project);
                                             for (final var editorWrapper : fileEditorManager.getAllEditors()) {
                                                 if (editorWrapper instanceof TextEditor textEditor) {
-                                                    var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
+                                                    final var psiFile = PsiManager.getInstance(project)
+                                                            .findFile(editorWrapper.getFile());
                                                     if (psiFile != null) {
                                                         UIPainter.paintEditor(textEditor.getEditor(), psiFile);
                                                     }
                                                 }
                                             }
-                                        }
-                                );
+                                        });
+                                    }
+                                }.queue();
                             }
                         }
                 );
@@ -204,6 +223,7 @@ public final class PIT4URunConfiguration
             return getOrDownloadMatchingLauncherAsync(project, detectedVersion)
                     .get(5, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             return StringUtils.EMPTY;
         }
     }

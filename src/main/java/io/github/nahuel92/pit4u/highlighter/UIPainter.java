@@ -6,8 +6,10 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiClassOwner;
 import com.intellij.psi.PsiFile;
+import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import io.github.nahuel92.pit4u.highlighter.dto.Mutation;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 import java.awt.Color;
@@ -20,18 +22,21 @@ public final class UIPainter {
     private static final MutationResult SURVIVED_RESULT = getSurvivedResult();
     private static final MutationResult NO_COVERAGE_RESULT = getNoCoverageResult();
 
+    private static final JBColor KILLED_BADGE_COLOR = new JBColor(
+            new Color(46, 139, 87),
+            new Color(98, 209, 137)
+    );
+    private static final JBColor SURVIVED_BADGE_COLOR = new JBColor(
+            new Color(178, 34, 34),
+            new Color(240, 100, 100)
+    );
+
     private static MutationResult getKilledResult() {
         final var textAttributes = createTextAttributes(
                 new Color(215, 245, 215),
                 new Color(43, 68, 43)
         );
-        final var gutterIcon = new LineIcon(
-                new JBColor(
-                        new Color(46, 139, 87),
-                        new Color(60, 179, 113)
-                )
-        );
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.GREEN);
     }
 
     private static MutationResult getSurvivedResult() {
@@ -39,12 +44,7 @@ public final class UIPainter {
                 new Color(255, 215, 215),
                 new Color(75, 43, 43)
         );
-        final var gutterIcon = new LineIcon(
-                new JBColor(
-                        new Color(178, 34, 34),
-                        new Color(220, 20, 60))
-        );
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.RED);
     }
 
     private static MutationResult getNoCoverageResult() {
@@ -52,8 +52,7 @@ public final class UIPainter {
                 new Color(242, 242, 242),
                 new Color(53, 53, 53)
         );
-        final var gutterIcon = new LineIcon(JBColor.GRAY);
-        return new MutationResult(textAttributes, gutterIcon);
+        return new MutationResult(textAttributes, LineIcon.GRAY);
     }
 
     private static TextAttributes createTextAttributes(final Color regular, final Color dark) {
@@ -66,11 +65,19 @@ public final class UIPainter {
         );
     }
 
+    public static void removeHighlighters(@NotNull final Editor editor) {
+        for (final var highlighter : editor.getMarkupModel().getAllHighlighters()) {
+            if (highlighter.getUserData(PIT_TOOLTIP_KEY) != null) {
+                editor.getMarkupModel().removeHighlighter(highlighter);
+            }
+        }
+    }
+
     public static void paintEditor(final Editor editor, final PsiFile psiFile) {
         if (!(psiFile instanceof PsiClassOwner classOwner)) {
             return;
         }
-        editor.getMarkupModel().removeAllHighlighters();
+        removeHighlighters(editor);
         final var classes = classOwner.getClasses();
         if (classes.length == 0) {
             return;
@@ -82,10 +89,6 @@ public final class UIPainter {
 
         final var dataService = MutationDataService.getInstance(psiFile.getProject());
         final var mutations = dataService.getMutationsForClass(fqName);
-        if (mutations == null || mutations.isEmpty()) {
-            return;
-        }
-
         final var totalLines = editor.getDocument().getLineCount();
         final var mutationsByLine = mutations.stream()
                 .collect(Collectors.groupingBy(Mutation::lineNumber));
@@ -141,15 +144,17 @@ public final class UIPainter {
                 .append("<ul style='margin-left: 15px; padding-left: 0;'>");
 
         for (final var mutation : lineMutations) {
-            final var badgeColor = mutation.status() == Mutation.Status.KILLED ? "#4E8B57" : "#B22222";
+            final var badgeColor = mutation.status() == Mutation.Status.KILLED
+                    ? KILLED_BADGE_COLOR
+                    : SURVIVED_BADGE_COLOR;
+            final var hexColor = ColorUtil.toHex(badgeColor);
             htmlBuilder.append("<li style='margin-bottom: 8px;'>")
-                    .append("<span style='color: ").append(badgeColor).append("; font-weight: bold;'>[")
+                    .append("<span style='color: ").append(hexColor).append("; font-weight: bold;'>[")
                     .append(mutation.status()).append("]</span> ")
                     .append("<b>Method:</b> ").append(mutation.mutatedMethod()).append("<br/>")
                     .append("<b>Detail:</b> ").append(mutation.description() != null ? mutation.description() : "None")
                     .append("</li>");
         }
-
         htmlBuilder.append("</ul>")
                 .append("</div>")
                 .append("</body></html>");
