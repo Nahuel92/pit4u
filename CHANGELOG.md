@@ -4,13 +4,20 @@
 
 ### Added
 
+- Highlighting now adapts to light/dark mode
+- Table bounds validation
+
 ### Changed
 
+- PIT execution now runs in background thread
+- Dialog size management
 - Updated dependencies (Pitest, Gradle and IntelliJ Platform SDK)
 
 ### Fixed
 
+- Detection for directories with Java code
 - Data-parsing for some mutation statuses
+- Potential memory leak related to key listeners on package choosers
 
 ## [0.3.2] - 2026-06-15
 

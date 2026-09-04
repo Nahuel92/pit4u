@@ -12,7 +12,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
@@ -33,8 +32,6 @@ public final class OtherParamsDialog extends DialogWrapper implements Disposable
         this.defaultButton = new JButton("Reset Defaults");
 
         setTitle("Pit4U - Other Parameters");
-        final var screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        //setSize(screenSize.width - 400, screenSize.height - 400);
         this.table.setPreferredScrollableViewportSize(JBUI.size(750, 450));
         init();
     }
