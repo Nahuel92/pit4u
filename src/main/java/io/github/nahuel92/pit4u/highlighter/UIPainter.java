@@ -23,12 +23,12 @@ public final class UIPainter {
     private static final MutationResult NO_COVERAGE_RESULT = getNoCoverageResult();
 
     private static final JBColor KILLED_BADGE_COLOR = new JBColor(
-            new Color(46, 139, 87),   // Light theme green
-            new Color(98, 209, 137)   // Dark theme readable green
+            new Color(46, 139, 87),
+            new Color(98, 209, 137)
     );
     private static final JBColor SURVIVED_BADGE_COLOR = new JBColor(
-            new Color(178, 34, 34),   // Light theme red
-            new Color(240, 100, 100)  // Dark theme readable red
+            new Color(178, 34, 34),
+            new Color(240, 100, 100)
     );
 
     private static MutationResult getKilledResult() {

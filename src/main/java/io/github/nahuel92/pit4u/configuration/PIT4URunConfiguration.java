@@ -36,6 +36,7 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.PathUtil;
 import io.github.nahuel92.pit4u.gui.PIT4USettingsEditor;
@@ -47,7 +48,6 @@ import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -117,25 +117,31 @@ public final class PIT4URunConfiguration
                                 new Task.Backgroundable(getProject(), "Loading PIT mutation results", true) {
                                     @Override
                                     public void run(@NotNull final ProgressIndicator indicator) {
+                                        final var project = getProject();
+                                        if (project == null) {
+                                            return;
+                                        }
                                         indicator.setIndeterminate(true);
 
-                                        if (!Files.exists(path)) {
-                                            final var error = "Could not find %s at %s."
-                                                    .formatted(mutationDataFileName, path);
+                                        final var virtualFile = VirtualFileManager.getInstance()
+                                                .refreshAndFindFileByNioPath(path);
+
+                                        if (virtualFile == null || !virtualFile.exists()) {
+                                            final var error = "Could not find %s at %s.".formatted(mutationDataFileName, path);
                                             if (consoleView != null) {
                                                 consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
                                             }
                                             return;
                                         }
 
-                                        final var results = XMLDataParser.parse(path);
-                                        MutationDataService.getInstance(getProject()).loadData(results.mutations());
+                                        final var results = XMLDataParser.parse(virtualFile);
+                                        MutationDataService.getInstance(project).loadData(results.mutations());
 
                                         ApplicationManager.getApplication().invokeLater(() -> {
-                                            final var fileEditorManager = FileEditorManager.getInstance(getProject());
+                                            final var fileEditorManager = FileEditorManager.getInstance(project);
                                             for (final var editorWrapper : fileEditorManager.getAllEditors()) {
                                                 if (editorWrapper instanceof TextEditor textEditor) {
-                                                    final var psiFile = PsiManager.getInstance(getProject())
+                                                    final var psiFile = PsiManager.getInstance(project)
                                                             .findFile(editorWrapper.getFile());
                                                     if (psiFile != null) {
                                                         UIPainter.paintEditor(textEditor.getEditor(), psiFile);
