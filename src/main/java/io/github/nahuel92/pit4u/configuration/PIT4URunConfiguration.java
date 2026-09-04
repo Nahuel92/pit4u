@@ -28,6 +28,8 @@ import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.options.SettingsEditor;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.Computable;
@@ -111,27 +113,38 @@ public final class PIT4URunConfiguration
                                 final var path = Path.of(pit4UEditorStatus.getReportDir())
                                         .resolve(mutationDataFileName)
                                         .toAbsolutePath();
-                                if (!Files.exists(path)) {
-                                    final var error = "Could not find %s at %s."
-                                            .formatted(mutationDataFileName, path);
-                                    consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
-                                    return;
-                                }
 
-                                ApplicationManager.getApplication().invokeLater(() -> {
-                                    final var results = XMLDataParser.parse(path);
-                                            MutationDataService.getInstance(getProject()).loadData(results.mutations());
+                                new Task.Backgroundable(getProject(), "Loading PIT mutation results", true) {
+                                    @Override
+                                    public void run(@NotNull final ProgressIndicator indicator) {
+                                        indicator.setIndeterminate(true);
+
+                                        if (!Files.exists(path)) {
+                                            final var error = "Could not find %s at %s."
+                                                    .formatted(mutationDataFileName, path);
+                                            if (consoleView != null) {
+                                                consoleView.print(error, ConsoleViewContentType.ERROR_OUTPUT);
+                                            }
+                                            return;
+                                        }
+
+                                        final var results = XMLDataParser.parse(path);
+                                        MutationDataService.getInstance(getProject()).loadData(results.mutations());
+
+                                        ApplicationManager.getApplication().invokeLater(() -> {
                                             final var fileEditorManager = FileEditorManager.getInstance(getProject());
                                             for (final var editorWrapper : fileEditorManager.getAllEditors()) {
                                                 if (editorWrapper instanceof TextEditor textEditor) {
-                                                    var psiFile = PsiManager.getInstance(getProject()).findFile(editorWrapper.getFile());
+                                                    final var psiFile = PsiManager.getInstance(getProject())
+                                                            .findFile(editorWrapper.getFile());
                                                     if (psiFile != null) {
                                                         UIPainter.paintEditor(textEditor.getEditor(), psiFile);
                                                     }
                                                 }
                                             }
-                                        }
-                                );
+                                        });
+                                    }
+                                }.queue();
                             }
                         }
                 );
