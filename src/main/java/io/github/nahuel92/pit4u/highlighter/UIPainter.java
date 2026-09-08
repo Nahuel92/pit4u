@@ -74,18 +74,21 @@ public final class UIPainter {
     }
 
     public static void paintEditor(final Editor editor, final PsiFile psiFile) {
-        if (!(psiFile instanceof PsiClassOwner classOwner)) {
-            return;
-        }
-        removeHighlighters(editor);
-        final var classes = classOwner.getClasses();
-        if (classes.length == 0) {
-            return;
-        }
-        final var fqName = classes[0].getQualifiedName();
-        if (fqName == null) {
-            return;
-        }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (editor.isDisposed() || !(psiFile instanceof PsiClassOwner classOwner)) {
+                return;
+            }
+
+            removeHighlighters(editor);
+
+            final var classes = classOwner.getClasses();
+            if (classes.length == 0) {
+                return;
+            }
+            final var fqName = classes[0].getQualifiedName();
+            if (fqName == null) {
+                return;
+            }
 
         final var dataService = MutationDataService.getInstance(psiFile.getProject());
         final var mutations = dataService.getMutationsForClass(fqName);

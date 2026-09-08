@@ -12,9 +12,13 @@ final class FileListener implements FileEditorManagerListener {
     public void fileOpened(@NotNull final FileEditorManager source, @NotNull final VirtualFile file) {
         final var project = source.getProject();
         final var psiFile = PsiManager.getInstance(project).findFile(file);
-        final var fileEditor = source.getSelectedEditor(file);
-        if (psiFile != null && fileEditor instanceof TextEditor textEditor) {
-            UIPainter.paintEditor(textEditor.getEditor(), psiFile);
+        if (psiFile == null) {
+            return;
+        }
+        for (final var fileEditor : source.getEditors(file)) {
+            if (fileEditor instanceof TextEditor textEditor) {
+                UIPainter.paintEditor(textEditor.getEditor(), psiFile);
+            }
         }
     }
 }

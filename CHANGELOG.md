@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Code coverage sometimes is not shown on Windows
+
 ## [0.3.4] - 2026-09-04
 
 ### Fixed
