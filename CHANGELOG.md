@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-### Added
-
-- Class hint with coverage
-
 ### Fixed
 
 - Code coverage sometimes is not shown on Windows

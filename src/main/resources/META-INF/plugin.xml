@@ -38,8 +38,4 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>
     </extensions>
-    <extensions defaultExtensionNs="com.intellij">
-        <projectViewNodeDecorator
-                implementation="io.github.nahuel92.pit4u.gui.PitCoverageNodeDecorator"/>
-    </extensions>
 </idea-plugin>

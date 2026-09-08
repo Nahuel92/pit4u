@@ -1,5 +1,6 @@
 package io.github.nahuel92.pit4u.highlighter;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -90,29 +91,30 @@ public final class UIPainter {
                 return;
             }
 
-        final var dataService = MutationDataService.getInstance(psiFile.getProject());
-        final var mutations = dataService.getMutationsForClass(fqName);
-        final var totalLines = editor.getDocument().getLineCount();
-        final var mutationsByLine = mutations.stream()
-                .collect(Collectors.groupingBy(Mutation::lineNumber));
+            final var dataService = MutationDataService.getInstance(psiFile.getProject());
+            final var mutations = dataService.getMutationsForClass(fqName);
+            final var totalLines = editor.getDocument().getLineCount();
+            final var mutationsByLine = mutations.stream()
+                    .collect(Collectors.groupingBy(Mutation::lineNumber));
 
-        for (final var entry : mutationsByLine.entrySet()) {
-            final var targetLine = entry.getKey() - 1;
-            if (targetLine < 0 || targetLine >= totalLines) {
-                continue;
+            for (final var entry : mutationsByLine.entrySet()) {
+                final var targetLine = entry.getKey() - 1;
+                if (targetLine < 0 || targetLine >= totalLines) {
+                    continue;
+                }
+                final var lineMutations = entry.getValue();
+                final var result = evaluateMutationResult(lineMutations);
+                final var highlighter = editor.getMarkupModel()
+                        .addLineHighlighter(
+                                targetLine,
+                                HighlighterLayer.SELECTION - 1,
+                                result.attributes()
+                        );
+                final var combinedHtmlTooltip = buildHtmlToolTip(lineMutations);
+                highlighter.setGutterIconRenderer(new MutationGutterIconRenderer(combinedHtmlTooltip, result.gutterIcon()));
+                highlighter.putUserData(PIT_TOOLTIP_KEY, combinedHtmlTooltip);
             }
-            final var lineMutations = entry.getValue();
-            final var result = evaluateMutationResult(lineMutations);
-            final var highlighter = editor.getMarkupModel()
-                    .addLineHighlighter(
-                            targetLine,
-                            HighlighterLayer.SELECTION - 1,
-                            result.attributes()
-                    );
-            final var combinedHtmlTooltip = buildHtmlToolTip(lineMutations);
-            highlighter.setGutterIconRenderer(new MutationGutterIconRenderer(combinedHtmlTooltip, result.gutterIcon()));
-            highlighter.putUserData(PIT_TOOLTIP_KEY, combinedHtmlTooltip);
-        }
+        });
     }
 
     private static MutationResult evaluateMutationResult(final Collection<Mutation> lineMutations) {
