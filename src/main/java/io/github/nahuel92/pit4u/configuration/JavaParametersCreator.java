@@ -25,6 +25,7 @@ final class JavaParametersCreator {
     private static final Logger LOG = Logger.getInstance(JavaParametersCreator.class);
     private static Collection<String> PIT_LIBS;
 
+    @NotNull
     public static JavaParameters create(@NotNull final JavaRunConfigurationModule configurationModule,
                                         @NotNull final Project project,
                                         @NotNull final PIT4UEditorStatus pit4UEditorStatus,

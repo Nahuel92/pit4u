@@ -83,3 +83,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
+
+tasks.runIde {
+    jvmArgs("-XX:+UnlockDiagnosticVMOptions")
+}

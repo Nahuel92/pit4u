@@ -47,7 +47,7 @@ public final class OtherParamsTableModel extends ListTableModel<OtherParamItem<?
                 new OtherParamItem<>("--timestampedReports", false),
                 new OtherParamItem<>("--verbose", false),
 
-                new OtherParamItem<>("--outputFormats", "XML"),
+                new OtherParamItem<>("--outputFormats", "XML HTML"),
 
                 new OtherParamItem<>("--timeoutFactor", "1.25"),
                 new OtherParamItem<>("--timeoutConst", "4000"),
@@ -71,6 +71,7 @@ public final class OtherParamsTableModel extends ListTableModel<OtherParamItem<?
     }
 
     @Override
+    @Nullable
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (rowIndex < 0 || rowIndex >= getItems().size()) {
             return null;

@@ -23,6 +23,7 @@ final class MutationGutterIconRenderer extends GutterIconRenderer {
     }
 
     @Override
+    @NotNull
     public String getTooltipText() {
         return tooltipHtml;
     }
@@ -33,7 +34,7 @@ final class MutationGutterIconRenderer extends GutterIconRenderer {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(@NotNull final Object o) {
         if (this == o) {
             return true;
         }
