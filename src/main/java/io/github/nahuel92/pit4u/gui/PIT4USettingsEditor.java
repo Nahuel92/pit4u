@@ -116,7 +116,7 @@ public final class PIT4USettingsEditor extends SettingsEditor<PIT4URunConfigurat
 
         Arrays.stream(otherParams.getListeners(ActionListener.class)).forEach(otherParams::removeActionListener);
 
-        LOG.info("PIT4USettingsEditor Disposed");
+        LOG.debug("PIT4USettingsEditor Disposed");
     }
 
     private ActionListener getPackageChooserListener(final String title, final TextFieldWithBrowseButton field,

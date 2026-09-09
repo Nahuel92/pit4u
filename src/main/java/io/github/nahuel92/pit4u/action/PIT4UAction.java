@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 
 public final class PIT4UAction extends AnAction {
     private static final Logger LOG = Logger.getInstance(PIT4UAction.class);
+    private static final String ACTION_NAME = "PIT4U Action";
 
     private static boolean shouldShow(final AnActionEvent e) {
         final var project = e.getProject();
@@ -104,14 +105,12 @@ public final class PIT4UAction extends AnAction {
     }
 
     private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
-        final var runConfig = runManager.findConfigurationByName("PIT4U Action");
+        final var runConfig = runManager.findConfigurationByName(ACTION_NAME);
         if (runConfig != null) {
+            runManager.setSelectedConfiguration(runConfig);
             return runConfig;
         }
-        final var newRunConfig = runManager.createConfiguration(
-                "PIT4U Action",
-                PIT4UConfigurationType.class
-        );
+        final var newRunConfig = runManager.createConfiguration(ACTION_NAME, PIT4UConfigurationType.class);
         runManager.addConfiguration(newRunConfig);
         runManager.setSelectedConfiguration(newRunConfig);
         return newRunConfig;
@@ -143,7 +142,7 @@ public final class PIT4UAction extends AnAction {
             status.setSourceDir(path.resolve("src").resolve("main").resolve("java").toString());
             return;
         }
-        LOG.info("Module is not using Maven or Gradle as build system!");
+        LOG.warn("Module is not using Maven or Gradle as build system!");
     }
 
     private static String getFullyQualifiedPackages(final AnActionEvent event, final Project project) {

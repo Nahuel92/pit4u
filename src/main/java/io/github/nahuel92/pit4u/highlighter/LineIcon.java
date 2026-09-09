@@ -29,12 +29,12 @@ public final class LineIcon implements Icon {
     private final Color color;
     private final int size = 12;
 
-    private LineIcon(@NotNull final Color color) {
+    private LineIcon(final Color color) {
         this.color = Objects.requireNonNull(color);
     }
 
     @Override
-    public void paintIcon(final Component c, final Graphics g, final int x, final int y) {
+    public void paintIcon(@NotNull final Component c, @NotNull final Graphics g, final int x, final int y) {
         final var g2d = (Graphics2D) g.create();
         try {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

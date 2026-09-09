@@ -30,10 +30,10 @@
         </action>
     </actions>
 
-    <applicationListeners>
+    <projectListeners>
         <listener class="io.github.nahuel92.pit4u.highlighter.FileListener"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
-    </applicationListeners>
+    </projectListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="io.github.nahuel92.pit4u.configuration.PIT4UConfigurationType"/>

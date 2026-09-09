@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.table.TableView;
 import com.intellij.util.ui.JBUI;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JButton;
@@ -43,6 +44,7 @@ public final class OtherParamsDialog extends DialogWrapper implements Disposable
     }
 
     @Override
+    @NotNull
     protected JComponent createCenterPanel() {
         defaultButton.addActionListener(e -> otherParamsTableModel.restoreDefaultValues());
         return getCenterPanel();
@@ -52,7 +54,7 @@ public final class OtherParamsDialog extends DialogWrapper implements Disposable
     public void dispose() {
         super.dispose();
         Arrays.stream(defaultButton.getListeners(ActionListener.class)).forEach(defaultButton::removeActionListener);
-        LOG.info("Other Parameters Dialog Disposed");
+        LOG.debug("Other Parameters Dialog Disposed");
     }
 
     public String getUserFriendlyModel() {

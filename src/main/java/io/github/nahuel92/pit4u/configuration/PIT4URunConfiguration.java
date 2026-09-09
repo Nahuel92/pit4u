@@ -45,7 +45,9 @@ import io.github.nahuel92.pit4u.highlighter.UIPainter;
 import io.github.nahuel92.pit4u.highlighter.XMLDataParser;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.idea.maven.utils.library.RepositoryLibraryProperties;
+import org.jspecify.annotations.NonNull;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -60,7 +62,6 @@ public final class PIT4URunConfiguration
         extends ModuleBasedConfiguration<JavaRunConfigurationModule, PIT4URunConfiguration>
         implements Disposable {
     public static final Key<Module> CONTEXT_MODULE = Key.create("PIT4U_CONTEXT_MODULE");
-
     private static final Logger LOG = Logger.getInstance(PIT4URunConfiguration.class);
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("junit-platform-engine-([\\w.-]+)\\.jar");
     private PIT4UEditorStatus pit4UEditorStatus = new PIT4UEditorStatus();
@@ -76,11 +77,14 @@ public final class PIT4URunConfiguration
     }
 
     @Override
+    @NotNull
+    @Unmodifiable
     public Collection<Module> getValidModules() {
         return List.of(ModuleManager.getInstance(getProject()).getModules());
     }
 
     @Override
+    @NonNull
     public RunProfileState getState(@NotNull final Executor executor, @NotNull final ExecutionEnvironment environment) {
         final var contextualModule = environment.getUserData(CONTEXT_MODULE);
         final var effectiveModule = (contextualModule != null) ? contextualModule : getConfigurationModule().getModule();
@@ -89,6 +93,7 @@ public final class PIT4URunConfiguration
             private ConsoleView consoleView;
 
             @Override
+            @NotNull
             protected JavaParameters createJavaParameters() {
                 final var alignedPath = resolveLauncherPathSynchronously(getEnvironment(), effectiveModule);
                 return JavaParametersCreator.create(
@@ -102,17 +107,11 @@ public final class PIT4URunConfiguration
             @Override
             @NotNull
             protected OSProcessHandler startProcess() throws com.intellij.execution.ExecutionException {
-                MutationDataService.getInstance(getProject()).clear();
                 final var osProcessHandler = super.startProcess();
                 osProcessHandler.addProcessListener(
                         new ProcessListener() {
                             @Override
                             public void processTerminated(@NotNull final ProcessEvent event) {
-                                final var mutationDataFileName = "mutations.xml";
-                                final var path = Path.of(pit4UEditorStatus.getReportDir())
-                                        .resolve(mutationDataFileName)
-                                        .toAbsolutePath();
-
                                 new Task.Backgroundable(getProject(), "Loading PIT mutation results", true) {
                                     @Override
                                     public void run(@NotNull final ProgressIndicator indicator) {
@@ -120,8 +119,13 @@ public final class PIT4URunConfiguration
                                         if (project == null) {
                                             return;
                                         }
-                                        indicator.setIndeterminate(true);
+                                        indicator.setIndeterminate(false);
 
+                                        final var mutationDataFileName = "mutations.xml";
+                                        final var path = Path.of(pit4UEditorStatus.getReportDir())
+                                                .resolve(mutationDataFileName)
+                                                .toAbsolutePath();
+                                        LOG.debug("PIT report file path: ", path);
                                         final var virtualFile = VirtualFileManager.getInstance()
                                                 .refreshAndFindFileByNioPath(path);
 
@@ -139,12 +143,13 @@ public final class PIT4URunConfiguration
                                         ApplicationManager.getApplication().invokeLater(() -> {
                                             final var fileEditorManager = FileEditorManager.getInstance(project);
                                             for (final var editorWrapper : fileEditorManager.getAllEditors()) {
-                                                if (editorWrapper instanceof TextEditor textEditor) {
-                                                    final var psiFile = PsiManager.getInstance(project)
-                                                            .findFile(editorWrapper.getFile());
-                                                    if (psiFile != null) {
-                                                        UIPainter.paintEditor(textEditor.getEditor(), psiFile);
-                                                    }
+                                                if (!(editorWrapper instanceof TextEditor textEditor)) {
+                                                    continue;
+                                                }
+                                                final var psiFile = PsiManager.getInstance(project)
+                                                        .findFile(editorWrapper.getFile());
+                                                if (psiFile != null) {
+                                                    UIPainter.paintEditor(textEditor.getEditor(), psiFile);
                                                 }
                                             }
                                         });
@@ -194,20 +199,20 @@ public final class PIT4URunConfiguration
 
     @Override
     public void dispose() {
-        LOG.info("PIT4URunConfiguration Disposed");
+        LOG.debug("PIT4URunConfiguration Disposed");
     }
 
     public PIT4UEditorStatus getPit4UEditorStatus() {
         return pit4UEditorStatus;
     }
 
-    public void setPit4UEditorStatus(final PIT4UEditorStatus pit4UEditorStatus) {
+    public void setPit4UEditorStatus(@NotNull final PIT4UEditorStatus pit4UEditorStatus) {
         this.pit4UEditorStatus = pit4UEditorStatus;
     }
 
     private String resolveLauncherPathSynchronously(final ExecutionEnvironment environment, final Module module) {
         if (module == null) {
-            LOG.warn("Cannot resolve JUnit platform launcher path because module is null!");
+            LOG.debug("Cannot resolve JUnit platform launcher path because module is null!");
             return null;
         }
         final var project = environment.getProject();
@@ -268,9 +273,7 @@ public final class PIT4URunConfiguration
                     final var cleanPath = PathUtil.toPresentableUrl(resolvedRoots.getFirst().getFile().getUrl());
                     future.complete(cleanPath);
                 })
-                .onError(_ -> {
-                    future.complete(null);
-                });
+                .onError(_ -> future.complete(null));
         return future;
     }
 }

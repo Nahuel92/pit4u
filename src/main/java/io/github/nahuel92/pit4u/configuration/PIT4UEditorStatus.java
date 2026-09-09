@@ -7,7 +7,7 @@ public final class PIT4UEditorStatus {
     private String targetTests = StringUtils.EMPTY;
     private String sourceDir = StringUtils.EMPTY;
     private String reportDir = StringUtils.EMPTY;
-    private String otherParams = "--outputFormats XML";
+    private String otherParams = "--outputFormats XML HTML";
 
     public String getTargetClasses() {
         return targetClasses;
