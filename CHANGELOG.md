@@ -5,6 +5,13 @@
 ### Fixed
 
 - Code coverage sometimes is not shown on Windows
+- Run configuration not selected when running the plugin
+-
+
+### Changed
+
+- Made `XML` and `HTML` the default output formats. Previously it was only `XML`
+- Log level was reduced to `debug` in most cases
 
 ## [0.3.4] - 2026-09-04
 

@@ -27,7 +27,7 @@ public final class XMLDataParser {
         try (final var inputStream = virtualFile.getInputStream()) {
             return XML_MAPPER.readValue(inputStream, Mutations.class);
         } catch (final JacksonException | IOException e) {
-            LOG.warn("Failed to parse PIT report file from VirtualFile: " + virtualFile.getPath(), e);
+            LOG.warn("Failed to parse PIT report file from: " + virtualFile.getPath(), e);
             return new Mutations(List.of());
         }
     }

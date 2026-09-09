@@ -105,13 +105,15 @@ public final class PIT4UAction extends AnAction {
     }
 
     private static RunnerAndConfigurationSettings getRunConfig(final RunManager runManager) {
-        var runConfig = runManager.findConfigurationByName(ACTION_NAME);
-        if (runConfig == null) {
-            runConfig = runManager.createConfiguration(ACTION_NAME, PIT4UConfigurationType.class);
-            runManager.addConfiguration(runConfig);
+        final var runConfig = runManager.findConfigurationByName(ACTION_NAME);
+        if (runConfig != null) {
+            runManager.setSelectedConfiguration(runConfig);
+            return runConfig;
         }
-        runManager.setSelectedConfiguration(runConfig);
-        return runConfig;
+        final var newRunConfig = runManager.createConfiguration(ACTION_NAME, PIT4UConfigurationType.class);
+        runManager.addConfiguration(newRunConfig);
+        runManager.setSelectedConfiguration(newRunConfig);
+        return newRunConfig;
     }
 
     private static PIT4UEditorStatus getPit4UEditorStatus(final AnActionEvent e, final Project project, final String basePath) {
