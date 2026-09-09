@@ -2,11 +2,12 @@
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-09-08
+
 ### Fixed
 
 - Code coverage sometimes is not shown on Windows
 - Run configuration not selected when running the plugin
--
 
 ### Changed
 
@@ -201,7 +202,8 @@
 
 - First release that adds a new configuration to run PIT mutation tests
 
-[Unreleased]: https://github.com/Nahuel92/pit4u/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/Nahuel92/pit4u/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/Nahuel92/pit4u/compare/v0.3.4...v0.3.5
 [0.3.4]: https://github.com/Nahuel92/pit4u/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/Nahuel92/pit4u/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/Nahuel92/pit4u/compare/v0.3.1...v0.3.2
